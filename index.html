@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>日常記錄中心</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body{font-family: Arial, "Noto Sans TC", sans-serif; max-width:720px; margin:16px auto; padding:0 12px;}
+    h1{margin-top:8px}
+    form{border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px}
+    label{display:block;margin:6px 0;font-size:14px}
+    input, select, button{padding:8px;margin-top:4px;width:100%;box-sizing:border-box}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    small{color:#666}
+  </style>
+</head>
+<body>
+  <h1>📒 我的日常記錄</h1>
+  <p><small>測試模式：若未設定後端，資料會保存在本機 (localStorage)。</small></p>
+
+  <form id="expenseForm">
+    <h3>💰 記帳</h3>
+    <label>日期時間
+      <input type="datetime-local" name="datetime">
+    </label>
+    <label>分類
+      <select name="category" required>
+        <option value="食">食</option>
+        <option value="衣">衣</option>
+        <option value="住">住</option>
+        <option value="行">行</option>
+        <option value="育">育</option>
+        <option value="樂">樂</option>
+      </select>
+    </label>
+    <label>項目
+      <input type="text" name="item" required>
+    </label>
+    <label>金額
+      <input type="number" name="amount" required>
+    </label>
+    <label>備註
+      <input type="text" name="note">
+    </label>
+    <button type="submit">送出記帳</button>
+  </form>
+
+  <form id="weightForm">
+    <h3>⚖️ 體重</h3>
+    <label>日期時間
+      <input type="datetime-local" name="datetime">
+    </label>
+    <label>體重 (kg)
+      <input type="number" step="0.1" name="weight" required>
+    </label>
+    <button type="submit">送出體重</button>
+  </form>
+
+  <form id="bpForm">
+    <h3>❤️ 血壓</h3>
+    <label>日期時間
+      <input type="datetime-local" name="datetime">
+    </label>
+    <div class="row">
+      <label>收縮壓
+        <input type="number" name="systolic" required>
+      </label>
+      <label>舒張壓
+        <input type="number" name="diastolic" required>
+      </label>
+    </div>
+    <label>心跳 (bpm)
+      <input type="number" name="heartRate">
+    </label>
+    <button type="submit">送出血壓</button>
+  </form>
+
+  <div style="margin-top:16px">
+    <button id="showRecent">顯示最近 10 筆（本機）</button>
+    <pre id="recentArea" style="white-space:pre-wrap;background:#fafafa;padding:8px;border-radius:6px;border:1px solid #eee;margin-top:8px;"></pre>
+  </div>
+
+<script>
+/* ====== 先把 API_URL 留空以便本機測試；日後替換成你的 Apps Script Web App URL ====== */
+const API_URL = ""; // 範例: "https://script.google.com/macros/s/XXX/exec"
+
+function nowISOStringFromDatetimeLocal(v){
+  // datetime-local 值像 "2025-09-15T08:30" -> 轉成 ISO 字串方便後端 parse
+  if (!v) return new Date().toISOString();
+  const d = new Date(v);
+  return d.toISOString();
+}
+
+/* 本機儲存（localStorage）備援 */
+function saveLocally(type, payload){
+  const list = JSON.parse(localStorage.getItem("daily_records_v1") || "[]");
+  list.unshift({type, payload, savedAt: new Date().toISOString()});
+  // 保留最多 1000 筆以免吃太多空間
+  localStorage.setItem("daily_records_v1", JSON.stringify(list.slice(0,1000)));
+  return Promise.resolve({status:"ok", source:"local"});
+}
+
+/* 發送到後端 (若 API_URL 有設定) */
+async function postToBackend(dataObj){
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(dataObj)
+  });
+  // 允許後端回覆文字或 JSON
+  try { return await res.json(); } catch(e){ return await res.text(); }
+}
+
+/* 通用送出 */
+async function sendData(type, data){
+  if (!API_URL){
+    await saveLocally(type, data);
+    alert("已儲存在本機（localStorage）。\n部署後再把 API_URL 填上即會傳到 Google Sheets。");
+    return;
+  }
+  try {
+    const resp = await postToBackend({type, ...data});
+    alert("後端回應： " + (typeof resp === "string" ? resp : JSON.stringify(resp)));
+  } catch (err){
+    console.error(err);
+    alert("傳送失敗，請檢查網路或後端設定。");
+  }
+}
+
+/* 表單綁定 */
+document.getElementById("expenseForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const fm = new FormData(e.target);
+  const obj = Object.fromEntries(fm);
+  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
+  sendData("Expense", obj);
+  e.target.reset();
+});
+
+document.getElementById("weightForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const fm = new FormData(e.target);
+  const obj = Object.fromEntries(fm);
+  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
+  sendData("Weight", obj);
+  e.target.reset();
+});
+
+document.getElementById("bpForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const fm = new FormData(e.target);
+  const obj = Object.fromEntries(fm);
+  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
+  sendData("BloodPressure", obj);
+  e.target.reset();
+});
+
+/* 顯示最近 10 筆（本機） */
+document.getElementById("showRecent").addEventListener("click", ()=>{
+  const list = JSON.parse(localStorage.getItem("daily_records_v1") || "[]");
+  const area = document.getElementById("recentArea");
+  if (list.length === 0){ area.textContent = "沒有本機紀錄。"; return; }
+  area.textContent = list.slice(0,10).map((r,i)=> `${i+1}. [${r.type}] ${r.savedAt}\n  ${JSON.stringify(r.payload)}\n`).join("\n");
+});
+
+/* 註冊 Service Worker（PWA 必要）*/
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered')).catch(e=>console.warn('SW failed', e));
+}
+</script>
+</body>
+</html>
