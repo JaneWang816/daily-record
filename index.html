@@ -97,6 +97,9 @@
           <option>衣</option>
           <option>住</option>
           <option>行</option>
+          <option>育</option>
+          <option>樂</option>
+          <option>健康</option>
           <option>其他</option>
         </select>
       </label>
@@ -144,7 +147,7 @@
 
   <script>
     // 替換成您的實際 URL 和 API 金鑰
-    const API_URL = "https://script.google.com/macros/s/AKfycbxPY-PGguDV0ugDXqUlCvO2JPdZ8ZlypXZc0IcWklIR9zYtIkP0ELjHp6A-nxAxYtQSjA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxj5GuF94NCbrZA_KC3hhXvsiIbb4tVHu5zGlD7TLQYirQoLe4Yt8nk3Tu1j5eU9IzjRw/exec";
     const API_KEY = "1qazxsw23edc"; // 與後端相同的 API 金鑰
 
     function showTab(tabId) {
@@ -201,6 +204,8 @@
         amount: document.getElementById("expAmount").value,
         note: document.getElementById("expNote").value
       };
+      
+      // 先嘗試 POST，如果失敗則嘗試 GET
       submitData(data, e.target);
     }
 
@@ -226,6 +231,15 @@
       submitData(data, e.target);
     }
 
+    // 測試 API 連接的函數
+    function testAPI() {
+      console.log('測試 API 連接...');
+      fetch(API_URL, {method: 'GET'})
+        .then(res => res.json())
+        .then(data => console.log('API 測試成功:', data))
+        .catch(err => console.error('API 測試失敗:', err));
+    }
+
     function setCurrentDateTime() {
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
@@ -239,8 +253,11 @@
       document.getElementById("bpTime").value = datetimeStr;
     }
 
-    // 頁面載入時設置當前日期時間
-    document.addEventListener('DOMContentLoaded', setCurrentDateTime);
+    // 頁面載入時設置當前日期時間並測試 API
+    document.addEventListener('DOMContentLoaded', function() {
+      setCurrentDateTime();
+      testAPI();
+    });
   </script>
 </body>
 </html>
