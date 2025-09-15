@@ -67,6 +67,13 @@
       margin-top: 1rem;
       cursor: pointer;
     }
+    button[type="submit"]:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .loading {
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
@@ -136,8 +143,9 @@
   </div>
 
   <script>
-    // TODO: 把這裡換成你自己的 Google Apps Script Web App URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbyDIgFN-GqqBPUYIiubOntPBFFK9hGGC5Gm3Oe6s79Z513Rr5fqBjIzwxN8Ip6o-wbQog/exec";
+    // 替換成您的實際 URL 和 API 金鑰
+    const API_URL = "https://script.google.com/macros/s/AKfycbz6jPFs_-6H4WilhYdHVykkg6j_SnKkgY-x4EUTGztLvABl0cIdJxUP6kgZKTowlVnT7w/exec";
+    const API_KEY = "1qazxsw23edc"; // 與後端相同的 API 金鑰
 
     function showTab(tabId) {
       document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -146,60 +154,93 @@
       document.querySelector(`nav button[onclick="showTab('${tabId}')"]`).classList.add("active");
     }
 
-    function saveExpense(e) {
-      e.preventDefault();
+    function submitData(data, form) {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '送出中...';
+      form.classList.add('loading');
+
       fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({
-          apiKey: "qazxswedc",
-	  type: "expense",
-          date: document.getElementById("expDate").value,
-          category: document.getElementById("expCategory").value,
-          amount: document.getElementById("expAmount").value,
-          note: document.getElementById("expNote").value
+          apiKey: API_KEY,
+          ...data
         }),
-        headers: { "Content-Type": "application/json" }
+        headers: { 
+          "Content-Type": "application/json"
+        }
       })
       .then(res => res.json())
-      .then(() => alert("✅ 支出已記錄！"))
-      .catch(err => alert("❌ 發生錯誤：" + err));
+      .then(result => {
+        if (result.success) {
+          alert("✅ 記錄已保存！");
+          form.reset();
+          // 為日期和時間欄位設置當前時間
+          setCurrentDateTime();
+        } else {
+          alert("❌ 儲存失敗：" + (result.error || "未知錯誤"));
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        alert("❌ 發生網路錯誤，請檢查連線或稍後再試");
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '送出';
+        form.classList.remove('loading');
+      });
+    }
+
+    function saveExpense(e) {
+      e.preventDefault();
+      const data = {
+        type: "expense",
+        date: document.getElementById("expDate").value,
+        category: document.getElementById("expCategory").value,
+        amount: document.getElementById("expAmount").value,
+        note: document.getElementById("expNote").value
+      };
+      submitData(data, e.target);
     }
 
     function saveWeight(e) {
       e.preventDefault();
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          apiKey: "qazxswedc",
-          type: "weight",
-          datetime: document.getElementById("weightTime").value,
-          weight: document.getElementById("weightValue").value
-        }),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.json())
-      .then(() => alert("✅ 體重已記錄！"))
-      .catch(err => alert("❌ 發生錯誤：" + err));
+      const data = {
+        type: "weight",
+        datetime: document.getElementById("weightTime").value,
+        weight: document.getElementById("weightValue").value
+      };
+      submitData(data, e.target);
     }
 
     function saveBP(e) {
       e.preventDefault();
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          apiKey: "qazxswedc",
-          type: "bp",
-          datetime: document.getElementById("bpTime").value,
-          sys: document.getElementById("bpSys").value,
-          dia: document.getElementById("bpDia").value,
-          pulse: document.getElementById("bpPulse").value
-        }),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.json())
-      .then(() => alert("✅ 血壓已記錄！"))
-      .catch(err => alert("❌ 發生錯誤：" + err));
+      const data = {
+        type: "bp",
+        datetime: document.getElementById("bpTime").value,
+        sys: document.getElementById("bpSys").value,
+        dia: document.getElementById("bpDia").value,
+        pulse: document.getElementById("bpPulse").value
+      };
+      submitData(data, e.target);
     }
+
+    function setCurrentDateTime() {
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const datetimeStr = now.toISOString().slice(0, 16);
+      
+      // 設置當前日期
+      document.getElementById("expDate").value = dateStr;
+      
+      // 設置當前時間
+      document.getElementById("weightTime").value = datetimeStr;
+      document.getElementById("bpTime").value = datetimeStr;
+    }
+
+    // 頁面載入時設置當前日期時間
+    document.addEventListener('DOMContentLoaded', setCurrentDateTime);
   </script>
 </body>
 </html>
