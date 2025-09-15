@@ -1,263 +1,139 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>我的日常記錄</title>
-  <style>
-    body {
-      font-family: "Microsoft JhengHei", sans-serif;
-      background: #f8f0fb;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #d8a7f0;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    nav {
-      display: flex;
-      background: #f3d9fa;
-    }
-    nav button {
-      flex: 1;
-      padding: 1rem;
-      border: none;
-      background: #f3d9fa;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    nav button.active {
-      background: #d8a7f0;
-      color: white;
-    }
-    .tab {
-      display: none;
-      padding: 1rem;
-    }
-    .tab.active {
-      display: block;
-    }
-    form {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 400px;
-      margin: auto;
-    }
-    label {
-      display: block;
-      margin-top: 0.5rem;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.2rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button[type="submit"] {
-      background: #d8a7f0;
-      color: white;
-      border: none;
-      margin-top: 1rem;
-      cursor: pointer;
-    }
-    button[type="submit"]:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    .loading {
-      opacity: 0.6;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>日常記錄 JSONP 前端 + 歷史</title>
+<style>
+  body { font-family: "Microsoft JhengHei", sans-serif; padding: 1rem; background: #f8f0fb; }
+  h2 { color: #6a1b9a; }
+  form, .history { margin: 1rem 0; padding: 1rem; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  label { display: block; margin-top: 0.5rem; }
+  input, select, button { width: 100%; padding: 0.5rem; margin-top: 0.2rem; border: 1px solid #ccc; border-radius: 4px; }
+  button { background: #9c27b0; color: white; cursor: pointer; margin-top: 1rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  th, td { border: 1px solid #ccc; padding: 0.3rem; text-align: center; }
+  pre { background: #eee; padding: 0.5rem; border-radius: 4px; }
+</style>
 </head>
 <body>
-  <header>我的日常記錄</header>
-  
-  <nav>
-    <button class="active" onclick="showTab('expense')">支出</button>
-    <button onclick="showTab('weight')">體重</button>
-    <button onclick="showTab('bp')">血壓</button>
-  </nav>
 
-  <!-- 支出 -->
-  <div id="expense" class="tab active">
-    <form onsubmit="saveExpense(event)">
-      <label>日期：
-        <input type="date" id="expDate" required>
-      </label>
-      <label>分類：
-        <select id="expCategory">
-          <option>食</option>
-          <option>衣</option>
-          <option>住</option>
-          <option>行</option>
-          <option>育</option>
-          <option>樂</option>
-          <option>健康</option>
-          <option>其他</option>
-        </select>
-      </label>
-      <label>金額：
-        <input type="number" id="expAmount" required>
-      </label>
-      <label>備註：
-        <input type="text" id="expNote">
-      </label>
-      <button type="submit">送出</button>
-    </form>
-  </div>
+<h2>日常記錄</h2>
 
-  <!-- 體重 -->
-  <div id="weight" class="tab">
-    <form onsubmit="saveWeight(event)">
-      <label>時間：
-        <input type="datetime-local" id="weightTime" required>
-      </label>
-      <label>體重 (kg)：
-        <input type="number" step="0.1" id="weightValue" required>
-      </label>
-      <button type="submit">送出</button>
-    </form>
-  </div>
+<!-- 表單 -->
+<form id="expenseForm">
+  <h3>支出</h3>
+  <label>日期：<input type="date" name="date" required></label>
+  <label>時間：<input type="time" name="time" required></label>
+  <label>分類：
+    <select name="category">
+      <option>食</option><option>衣</option><option>住</option>
+      <option>行</option><option>育</option><option>樂</option>
+      <option>健康</option><option>其他</option>
+    </select>
+  </label>
+  <label>金額：<input type="number" name="amount" required></label>
+  <label>備註：<input type="text" name="note"></label>
+  <button type="submit">送出支出</button>
+</form>
 
-  <!-- 血壓 -->
-  <div id="bp" class="tab">
-    <form onsubmit="saveBP(event)">
-      <label>時間：
-        <input type="datetime-local" id="bpTime" required>
-      </label>
-      <label>收縮壓：
-        <input type="number" id="bpSys" required>
-      </label>
-      <label>舒張壓：
-        <input type="number" id="bpDia" required>
-      </label>
-      <label>脈搏：
-        <input type="number" id="bpPulse">
-      </label>
-      <button type="submit">送出</button>
-    </form>
-  </div>
+<form id="weightForm">
+  <h3>體重</h3>
+  <label>日期：<input type="date" name="date" required></label>
+  <label>時間：<input type="time" name="time" required></label>
+  <label>體重 (kg)：<input type="number" step="0.1" name="weight" required></label>
+  <button type="submit">送出體重</button>
+</form>
 
-  <script>
-    // 替換成您的實際 URL 和 API 金鑰
-    const API_URL = "https://script.google.com/macros/s/AKfycbxj5GuF94NCbrZA_KC3hhXvsiIbb4tVHu5zGlD7TLQYirQoLe4Yt8nk3Tu1j5eU9IzjRw/exec";
-    const API_KEY = "1qazxsw23edc"; // 與後端相同的 API 金鑰
+<form id="bpForm">
+  <h3>血壓</h3>
+  <label>日期：<input type="date" name="date" required></label>
+  <label>時間：<input type="time" name="time" required></label>
+  <label>收縮壓：<input type="number" name="sys" required></label>
+  <label>舒張壓：<input type="number" name="dia" required></label>
+  <label>脈搏：<input type="number" name="pulse"></label>
+  <button type="submit">送出血壓</button>
+</form>
 
-    function showTab(tabId) {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-      document.getElementById(tabId).classList.add("active");
-      document.querySelector(`nav button[onclick="showTab('${tabId}')"]`).classList.add("active");
-    }
+<h3>伺服器回應</h3>
+<pre id="result"></pre>
 
-    function submitData(data, form) {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.textContent = '送出中...';
-      form.classList.add('loading');
+<div class="history">
+  <h3>歷史紀錄</h3>
+  <div id="historyTables"></div>
+</div>
 
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          apiKey: API_KEY,
-          ...data
-        }),
-        headers: { 
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          alert("✅ 記錄已保存！");
-          form.reset();
-          // 為日期和時間欄位設置當前時間
-          setCurrentDateTime();
-        } else {
-          alert("❌ 儲存失敗：" + (result.error || "未知錯誤"));
-        }
-      })
-      .catch(err => {
-        console.error('Error:', err);
-        alert("❌ 發生網路錯誤，請檢查連線或稍後再試");
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '送出';
-        form.classList.remove('loading');
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzOX642s3Z4xr_VrilBF-BmUWFmhip2z2UEonlSLeVA7YomN0IvPnaOOzKZQ_8CTgmuA/exec";
+const API_KEY = "1qazxsw23edc"; 
+
+// 自動填入當前日期與時間
+function setCurrentDateTime() {
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(':').slice(0,2).join(':');
+  document.querySelectorAll('input[type="date"]').forEach(input => input.value = dateStr);
+  document.querySelectorAll('input[type="time"]').forEach(input => input.value = timeStr);
+}
+
+// JSONP 請求
+function sendJSONP(params) {
+  params.apiKey = API_KEY;
+  params.callback = "handleResponse";
+  const query = new URLSearchParams(params).toString();
+  const script = document.createElement("script");
+  script.src = `${SCRIPT_URL}?${query}`;
+  document.body.appendChild(script);
+  setTimeout(() => document.body.removeChild(script), 5000);
+}
+
+// JSONP 回呼
+function handleResponse(response) {
+  console.log("伺服器回應:", response);
+  document.getElementById("result").textContent = JSON.stringify(response, null, 2);
+  if(response.success && response.data) {
+    renderHistory(response.data);
+  }
+}
+
+// 表單送出
+document.getElementById("expenseForm").onsubmit = e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  sendJSONP({ type: "expense", ...data });
+};
+document.getElementById("weightForm").onsubmit = e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  sendJSONP({ type: "weight", ...data });
+};
+document.getElementById("bpForm").onsubmit = e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  sendJSONP({ type: "bp", ...data });
+};
+
+// 顯示歷史資料
+function renderHistory(data) {
+  const container = document.getElementById("historyTables");
+  container.innerHTML = "";
+  ["expense","weight","bp"].forEach(type=>{
+    if(data[type] && data[type].length){
+      let html = `<h4>${type.toUpperCase()}</h4><table><tr>`;
+      Object.keys(data[type][0]).forEach(k=> html+=`<th>${k}</th>`);
+      html += "</tr>";
+      data[type].forEach(row=>{
+        html += "<tr>";
+        Object.values(row).forEach(v=> html+=`<td>${v}</td>`);
+        html += "</tr>";
       });
+      html += "</table>";
+      container.innerHTML += html;
     }
+  });
+}
 
-    function saveExpense(e) {
-      e.preventDefault();
-      const data = {
-        type: "expense",
-        date: document.getElementById("expDate").value,
-        category: document.getElementById("expCategory").value,
-        amount: document.getElementById("expAmount").value,
-        note: document.getElementById("expNote").value
-      };
-      
-      // 先嘗試 POST，如果失敗則嘗試 GET
-      submitData(data, e.target);
-    }
+document.addEventListener('DOMContentLoaded', setCurrentDateTime);
+</script>
 
-    function saveWeight(e) {
-      e.preventDefault();
-      const data = {
-        type: "weight",
-        datetime: document.getElementById("weightTime").value,
-        weight: document.getElementById("weightValue").value
-      };
-      submitData(data, e.target);
-    }
-
-    function saveBP(e) {
-      e.preventDefault();
-      const data = {
-        type: "bp",
-        datetime: document.getElementById("bpTime").value,
-        sys: document.getElementById("bpSys").value,
-        dia: document.getElementById("bpDia").value,
-        pulse: document.getElementById("bpPulse").value
-      };
-      submitData(data, e.target);
-    }
-
-    // 測試 API 連接的函數
-    function testAPI() {
-      console.log('測試 API 連接...');
-      fetch(API_URL, {method: 'GET'})
-        .then(res => res.json())
-        .then(data => console.log('API 測試成功:', data))
-        .catch(err => console.error('API 測試失敗:', err));
-    }
-
-    function setCurrentDateTime() {
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-      const datetimeStr = now.toISOString().slice(0, 16);
-      
-      // 設置當前日期
-      document.getElementById("expDate").value = dateStr;
-      
-      // 設置當前時間
-      document.getElementById("weightTime").value = datetimeStr;
-      document.getElementById("bpTime").value = datetimeStr;
-    }
-
-    // 頁面載入時設置當前日期時間並測試 API
-    document.addEventListener('DOMContentLoaded', function() {
-      setCurrentDateTime();
-      testAPI();
-    });
-  </script>
 </body>
 </html>
