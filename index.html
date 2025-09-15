@@ -1,174 +1,202 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>日常記錄中心</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <title>我的日常記錄</title>
   <style>
-    body{font-family: Arial, "Noto Sans TC", sans-serif; max-width:720px; margin:16px auto; padding:0 12px;}
-    h1{margin-top:8px}
-    form{border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px}
-    label{display:block;margin:6px 0;font-size:14px}
-    input, select, button{padding:8px;margin-top:4px;width:100%;box-sizing:border-box}
-    .row{display:flex;gap:8px}
-    .row > *{flex:1}
-    small{color:#666}
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background: #f8f0fb;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #d8a7f0;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    nav {
+      display: flex;
+      background: #f3d9fa;
+    }
+    nav button {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      background: #f3d9fa;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    nav button.active {
+      background: #d8a7f0;
+      color: white;
+    }
+    .tab {
+      display: none;
+      padding: 1rem;
+    }
+    .tab.active {
+      display: block;
+    }
+    form {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 0.5rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.2rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button[type="submit"] {
+      background: #d8a7f0;
+      color: white;
+      border: none;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h1>📒 我的日常記錄</h1>
-  <p><small>測試模式：若未設定後端，資料會保存在本機 (localStorage)。</small></p>
+  <header>我的日常記錄</header>
+  
+  <nav>
+    <button class="active" onclick="showTab('expense')">支出</button>
+    <button onclick="showTab('weight')">體重</button>
+    <button onclick="showTab('bp')">血壓</button>
+  </nav>
 
-  <form id="expenseForm">
-    <h3>💰 記帳</h3>
-    <label>日期時間
-      <input type="datetime-local" name="datetime">
-    </label>
-    <label>分類
-      <select name="category" required>
-        <option value="食">食</option>
-        <option value="衣">衣</option>
-        <option value="住">住</option>
-        <option value="行">行</option>
-        <option value="育">育</option>
-        <option value="樂">樂</option>
-      </select>
-    </label>
-    <label>項目
-      <input type="text" name="item" required>
-    </label>
-    <label>金額
-      <input type="number" name="amount" required>
-    </label>
-    <label>備註
-      <input type="text" name="note">
-    </label>
-    <button type="submit">送出記帳</button>
-  </form>
-
-  <form id="weightForm">
-    <h3>⚖️ 體重</h3>
-    <label>日期時間
-      <input type="datetime-local" name="datetime">
-    </label>
-    <label>體重 (kg)
-      <input type="number" step="0.1" name="weight" required>
-    </label>
-    <button type="submit">送出體重</button>
-  </form>
-
-  <form id="bpForm">
-    <h3>❤️ 血壓</h3>
-    <label>日期時間
-      <input type="datetime-local" name="datetime">
-    </label>
-    <div class="row">
-      <label>收縮壓
-        <input type="number" name="systolic" required>
+  <!-- 支出 -->
+  <div id="expense" class="tab active">
+    <form onsubmit="saveExpense(event)">
+      <label>日期：
+        <input type="date" id="expDate" required>
       </label>
-      <label>舒張壓
-        <input type="number" name="diastolic" required>
+      <label>分類：
+        <select id="expCategory">
+          <option>食</option>
+          <option>衣</option>
+          <option>住</option>
+          <option>行</option>
+          <option>其他</option>
+        </select>
       </label>
-    </div>
-    <label>心跳 (bpm)
-      <input type="number" name="heartRate">
-    </label>
-    <button type="submit">送出血壓</button>
-  </form>
-
-  <div style="margin-top:16px">
-    <button id="showRecent">顯示最近 10 筆（本機）</button>
-    <pre id="recentArea" style="white-space:pre-wrap;background:#fafafa;padding:8px;border-radius:6px;border:1px solid #eee;margin-top:8px;"></pre>
+      <label>金額：
+        <input type="number" id="expAmount" required>
+      </label>
+      <label>備註：
+        <input type="text" id="expNote">
+      </label>
+      <button type="submit">送出</button>
+    </form>
   </div>
 
-<script>
-/* ====== 先把 API_URL 留空以便本機測試；日後替換成你的 Apps Script Web App URL ====== */
-const API_URL = ""; // 範例: "https://script.google.com/macros/s/XXX/exec"
+  <!-- 體重 -->
+  <div id="weight" class="tab">
+    <form onsubmit="saveWeight(event)">
+      <label>時間：
+        <input type="datetime-local" id="weightTime" required>
+      </label>
+      <label>體重 (kg)：
+        <input type="number" step="0.1" id="weightValue" required>
+      </label>
+      <button type="submit">送出</button>
+    </form>
+  </div>
 
-function nowISOStringFromDatetimeLocal(v){
-  // datetime-local 值像 "2025-09-15T08:30" -> 轉成 ISO 字串方便後端 parse
-  if (!v) return new Date().toISOString();
-  const d = new Date(v);
-  return d.toISOString();
-}
+  <!-- 血壓 -->
+  <div id="bp" class="tab">
+    <form onsubmit="saveBP(event)">
+      <label>時間：
+        <input type="datetime-local" id="bpTime" required>
+      </label>
+      <label>收縮壓：
+        <input type="number" id="bpSys" required>
+      </label>
+      <label>舒張壓：
+        <input type="number" id="bpDia" required>
+      </label>
+      <label>脈搏：
+        <input type="number" id="bpPulse">
+      </label>
+      <button type="submit">送出</button>
+    </form>
+  </div>
 
-/* 本機儲存（localStorage）備援 */
-function saveLocally(type, payload){
-  const list = JSON.parse(localStorage.getItem("daily_records_v1") || "[]");
-  list.unshift({type, payload, savedAt: new Date().toISOString()});
-  // 保留最多 1000 筆以免吃太多空間
-  localStorage.setItem("daily_records_v1", JSON.stringify(list.slice(0,1000)));
-  return Promise.resolve({status:"ok", source:"local"});
-}
+  <script>
+    // TODO: 把這裡換成你自己的 Google Apps Script Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxnH13GTCdwPfDhAm0O8cOkrgmVrCziAgGjcKzlZdfM2hZcM8AXv6gweZNqlGJquWa-Zw/exec";
 
-/* 發送到後端 (若 API_URL 有設定) */
-async function postToBackend(dataObj){
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(dataObj)
-  });
-  // 允許後端回覆文字或 JSON
-  try { return await res.json(); } catch(e){ return await res.text(); }
-}
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      document.querySelector(`nav button[onclick="showTab('${tabId}')"]`).classList.add("active");
+    }
 
-/* 通用送出 */
-async function sendData(type, data){
-  if (!API_URL){
-    await saveLocally(type, data);
-    alert("已儲存在本機（localStorage）。\n部署後再把 API_URL 填上即會傳到 Google Sheets。");
-    return;
-  }
-  try {
-    const resp = await postToBackend({type, ...data});
-    alert("後端回應： " + (typeof resp === "string" ? resp : JSON.stringify(resp)));
-  } catch (err){
-    console.error(err);
-    alert("傳送失敗，請檢查網路或後端設定。");
-  }
-}
+    function saveExpense(e) {
+      e.preventDefault();
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "expense",
+          date: document.getElementById("expDate").value,
+          category: document.getElementById("expCategory").value,
+          amount: document.getElementById("expAmount").value,
+          note: document.getElementById("expNote").value
+        }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(() => alert("✅ 支出已記錄！"))
+      .catch(err => alert("❌ 發生錯誤：" + err));
+    }
 
-/* 表單綁定 */
-document.getElementById("expenseForm").addEventListener("submit", e=>{
-  e.preventDefault();
-  const fm = new FormData(e.target);
-  const obj = Object.fromEntries(fm);
-  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
-  sendData("Expense", obj);
-  e.target.reset();
-});
+    function saveWeight(e) {
+      e.preventDefault();
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "weight",
+          datetime: document.getElementById("weightTime").value,
+          weight: document.getElementById("weightValue").value
+        }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(() => alert("✅ 體重已記錄！"))
+      .catch(err => alert("❌ 發生錯誤：" + err));
+    }
 
-document.getElementById("weightForm").addEventListener("submit", e=>{
-  e.preventDefault();
-  const fm = new FormData(e.target);
-  const obj = Object.fromEntries(fm);
-  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
-  sendData("Weight", obj);
-  e.target.reset();
-});
-
-document.getElementById("bpForm").addEventListener("submit", e=>{
-  e.preventDefault();
-  const fm = new FormData(e.target);
-  const obj = Object.fromEntries(fm);
-  obj.datetime = nowISOStringFromDatetimeLocal(obj.datetime);
-  sendData("BloodPressure", obj);
-  e.target.reset();
-});
-
-/* 顯示最近 10 筆（本機） */
-document.getElementById("showRecent").addEventListener("click", ()=>{
-  const list = JSON.parse(localStorage.getItem("daily_records_v1") || "[]");
-  const area = document.getElementById("recentArea");
-  if (list.length === 0){ area.textContent = "沒有本機紀錄。"; return; }
-  area.textContent = list.slice(0,10).map((r,i)=> `${i+1}. [${r.type}] ${r.savedAt}\n  ${JSON.stringify(r.payload)}\n`).join("\n");
-});
-
-/* 註冊 Service Worker（PWA 必要）*/
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered')).catch(e=>console.warn('SW failed', e));
-}
-</script>
+    function saveBP(e) {
+      e.preventDefault();
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "bp",
+          datetime: document.getElementById("bpTime").value,
+          sys: document.getElementById("bpSys").value,
+          dia: document.getElementById("bpDia").value,
+          pulse: document.getElementById("bpPulse").value
+        }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(() => alert("✅ 血壓已記錄！"))
+      .catch(err => alert("❌ 發生錯誤：" + err));
+    }
+  </script>
 </body>
 </html>
