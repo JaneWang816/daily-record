@@ -1,330 +1,69 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <title>日常記錄 — 支出 / 體重 / 血壓</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    /* 簡潔純 CSS 樣式 */
-    :root { --accent: #8e44ad; --muted: #f3f0f6; --card: #fff; font-size:16px; }
-    body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: #f8f6fb; color:#222; margin:0; padding:24px; }
-    header { text-align:center; margin-bottom:18px; }
-    h1 { margin:0; color:var(--accent); }
-    .container { max-width:900px; margin:0 auto; }
-
-    /* tabs */
-    .tabs { display:flex; gap:8px; margin-bottom:12px; }
-    .tab {
-      padding:10px 16px; background:var(--muted); border-radius:8px; cursor:pointer; user-select:none;
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-    .tab.active { background:var(--card); box-shadow: 0 6px 18px rgba(0,0,0,0.06); color:var(--accent); font-weight:600; }
-
-    /* content card */
-    .card { background:var(--card); padding:16px; border-radius:10px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
-    .row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
-    label { display:block; font-size:14px; color:#444; }
-    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
-      padding:8px; border:1px solid #ddd; border-radius:6px; min-width:160px;
-    }
-    .col { flex:1 1 200px; min-width:160px; }
-    button { padding:10px 14px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer; }
-    button.secondary { background:#eee; color:#333; }
-    .small { font-size:13px; color:#666; margin-top:6px; }
-
-    /* list */
-    ul.record-list { list-style:none; padding:0; margin:8px 0; max-height:300px; overflow:auto; }
-    li.record { padding:8px; border-bottom:1px solid #f0f0f0; font-size:14px; }
-
-    /* responsive */
-    @media (max-width:600px) {
-      .row { flex-direction:column; align-items:stretch; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>健康與支出記錄</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>我的日常記錄</h1>
-      <p class="small">支出 / 體重 / 血壓 — 與 Google Sheets 同步</p>
-    </header>
+<h1>健康與支出記錄</h1>
 
-    <div class="tabs">
-      <div class="tab active" data-tab="tab-expense">💰 支出</div>
-      <div class="tab" data-tab="tab-weight">⚖️ 體重</div>
-      <div class="tab" data-tab="tab-bp">❤️ 血壓</div>
-    </div>
+<div class="tabs">
+  <div class="tab active" data-tab="expense">支出</div>
+  <div class="tab" data-tab="weight">體重</div>
+  <div class="tab" data-tab="bloodPressure">血壓</div>
+</div>
 
-    <!-- 支出 -->
-    <section id="tab-expense" class="card">
-      <h3>新增支出</h3>
-      <form id="form-expense">
-        <div class="row">
-          <div class="col">
-            <label>日期</label>
-            <input type="date" name="date" required>
-          </div>
-          <div class="col">
-            <label>類別</label>
-            <select name="category">
-              <option>食</option><option>衣</option><option>住</option><option>行</option>
-              <option>育</option><option>樂</option><option>健康</option><option>規費</option>
-            </select>
-          </div>
-        </div>
+<!-- 支出 -->
+<div id="expense" class="content active">
+  <form id="expenseForm">
+    <label>日期：<input type="date" name="date"></label>
+    <label>類別：
+      <select name="category">
+        <option>食</option><option>衣</option><option>住</option><option>行</option>
+        <option>育</option><option>樂</option><option>健康</option><option>規費</option>
+      </select>
+    </label>
+    <label>項目：<input type="text" name="item"></label>
+    <label>金額：<input type="number" name="amount"></label>
+    <label>備註：<input type="text" name="note"></label>
+    <button type="submit">送出</button>
+  </form>
 
-        <div class="row">
-          <div class="col">
-            <label>項目</label>
-            <input type="text" name="item" placeholder="例如：午餐/計程車" required>
-          </div>
-          <div class="col">
-            <label>金額</label>
-            <input type="number" name="amount" min="0" step="0.01" placeholder="0" required>
-          </div>
-        </div>
+  <h3>分類支出統計</h3>
+  <canvas id="expenseCategoryChart"></canvas>
 
-        <div class="row">
-          <div class="col" style="flex-basis:100%">
-            <label>備註</label>
-            <input type="text" name="note" placeholder="可選">
-          </div>
-        </div>
+  <h3>每月支出統計</h3>
+  <canvas id="expenseMonthlyChart"></canvas>
+</div>
 
-        <div class="row">
-          <button type="submit" id="expenseSubmit">送出支出</button>
-          <button type="button" class="secondary" onclick="loadData('expense')">載入支出資料</button>
-        </div>
-      </form>
+<!-- 體重 -->
+<div id="weight" class="content">
+  <form id="weightForm">
+    <label>日期：<input type="date" name="date"></label>
+    <label>時間：<input type="time" name="time"></label>
+    <label>體重：<input type="number" name="weight" step="0.1"></label>
+    <label>備註：<input type="text" name="note"></label>
+    <button type="submit">送出</button>
+  </form>
+  <canvas id="weightChart"></canvas>
+</div>
 
-      <p id="expenseMessage" class="small"></p>
-      <ul id="expenseList" class="record-list"></ul>
-    </section>
+<!-- 血壓 -->
+<div id="bloodPressure" class="content">
+  <form id="bpForm">
+    <label>日期：<input type="date" name="date"></label>
+    <label>時間：<input type="time" name="time"></label>
+    <label>收縮壓：<input type="number" name="systolic"></label>
+    <label>舒張壓：<input type="number" name="diastolic"></label>
+    <label>脈搏：<input type="number" name="pulse"></label>
+    <label>備註：<input type="text" name="note"></label>
+    <button type="submit">送出</button>
+  </form>
+  <canvas id="bpChart"></canvas>
+</div>
 
-    <!-- 體重 -->
-    <section id="tab-weight" class="card" style="display:none; margin-top:12px;">
-      <h3>新增體重</h3>
-      <form id="form-weight">
-        <div class="row">
-          <div class="col">
-            <label>日期</label>
-            <input type="date" name="date" required>
-          </div>
-          <div class="col">
-            <label>時間</label>
-            <input type="time" name="time" required>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label>體重 (kg)</label>
-            <input type="number" step="0.1" name="weight" required>
-          </div>
-          <div class="col">
-            <label>備註</label>
-            <input type="text" name="note" placeholder="可選">
-          </div>
-        </div>
-
-        <div class="row">
-          <button type="submit" id="weightSubmit">送出體重</button>
-          <button type="button" class="secondary" onclick="loadData('weight')">載入體重資料</button>
-        </div>
-      </form>
-
-      <p id="weightMessage" class="small"></p>
-      <ul id="weightList" class="record-list"></ul>
-    </section>
-
-    <!-- 血壓 -->
-    <section id="tab-bp" class="card" style="display:none; margin-top:12px;">
-      <h3>新增血壓</h3>
-      <form id="form-bp">
-        <div class="row">
-          <div class="col">
-            <label>日期</label>
-            <input type="date" name="date" required>
-          </div>
-          <div class="col">
-            <label>時間</label>
-            <input type="time" name="time" required>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label>收縮壓 (mmHg)</label>
-            <input type="number" name="systolic" required>
-          </div>
-          <div class="col">
-            <label>舒張壓 (mmHg)</label>
-            <input type="number" name="diastolic" required>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <label>脈搏</label>
-            <input type="number" name="pulse" placeholder="可選">
-          </div>
-          <div class="col">
-            <label>備註</label>
-            <input type="text" name="note" placeholder="可選">
-          </div>
-        </div>
-
-        <div class="row">
-          <button type="submit" id="bpSubmit">送出血壓</button>
-          <button type="button" class="secondary" onclick="loadData('blood pressure')">載入血壓資料</button>
-        </div>
-      </form>
-
-      <p id="bpMessage" class="small"></p>
-      <ul id="bpList" class="record-list"></ul>
-    </section>
-  </div>
-
-  <script>
-    /***************** 配置 *****************/
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKTwV8TB24duAcQzhnci_SbD5ojTR95N4Obp3LDHFUxbw4puDzzu-NV4PFi32X6Ty-vQ/exec"; // <- 把這裡改成你部署後的 Apps Script Web App URL
-    const API_KEY = "1qazxsw23edc"; // <- 若後端啟用金鑰驗證，把相同字串放這裡；否則留空 ""
-
-    /************ Tab 切換 (純 CSS 顯示/隱藏) ************/
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        // hide all sections
-        document.querySelectorAll('section.card').forEach(s => s.style.display = 'none');
-        // show selected
-        const id = tab.getAttribute('data-tab');
-        document.getElementById(id).style.display = 'block';
-      });
-    });
-
-    /************ 預設填入當前日期/時間 ************/
-    function setDefaults() {
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-      const timeStr = now.toTimeString().split(':').slice(0,2).join(':');
-      document.querySelectorAll('input[type="date"]').forEach(i => i.value = dateStr);
-      document.querySelectorAll('input[type="time"]').forEach(i => i.value = timeStr);
-    }
-    setDefaults();
-
-    /************ 提交處理（POST via FormData） ************/
-    async function postForm(formElem, sheetName, messageElem, listReloadName) {
-      const btn = formElem.querySelector('button[type="submit"]');
-      const formData = new FormData(formElem);
-      formData.append('sheet', sheetName);
-      if (API_KEY) formData.append('apiKey', API_KEY);
-
-      try {
-        btn.disabled = true;
-        btn.textContent = '送出中...';
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
-        const json = await res.json();
-        if (json && json.success) {
-          messageElem.textContent = '✅ ' + (json.message || '已儲存');
-          formElem.reset();
-          setDefaults();
-          // 自動 reload 最新幾筆
-          loadData(listReloadName || sheetName, 20);
-        } else {
-          messageElem.textContent = '❌ ' + (json.error || JSON.stringify(json));
-        }
-      } catch (err) {
-        messageElem.textContent = '❌ 網路錯誤: ' + err;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = btn.id === 'expenseSubmit' || btn.id === 'weightSubmit' || btn.id === 'bpSubmit' ? (btn.id === 'expenseSubmit' ? '送出支出' : btn.id === 'weightSubmit' ? '送出體重' : '送出血壓') : '送出';
-      }
-    }
-
-    // 綁定表單
-    document.getElementById('form-expense').addEventListener('submit', e => {
-      e.preventDefault();
-      postForm(e.target, 'expense', document.getElementById('expenseMessage'), 'expense');
-    });
-    document.getElementById('form-weight').addEventListener('submit', e => {
-      e.preventDefault();
-      postForm(e.target, 'weight', document.getElementById('weightMessage'), 'weight');
-    });
-    document.getElementById('form-bp').addEventListener('submit', e => {
-      e.preventDefault();
-      postForm(e.target, 'blood pressure', document.getElementById('bpMessage'), 'blood pressure');
-    });
-
-    /************ 載入資料（GET: action=read&sheet=...） ************/
-    async function loadData(sheet, limit = 50) {
-      try {
-        const url = `${SCRIPT_URL}?action=read&sheet=${encodeURIComponent(sheet)}&limit=${limit}` + (API_KEY ? `&apiKey=${encodeURIComponent(API_KEY)}` : '');
-        const res = await fetch(url);
-        const json = await res.json();
-        if (!Array.isArray(json)) {
-          console.error('讀取回傳非陣列', json);
-          return;
-        }
-
-        // 依 sheet 填入對應 list
-        if (sheet === 'expense') renderExpense(json);
-        else if (sheet === 'weight') renderWeight(json);
-        else if (sheet === 'blood pressure') renderBP(json);
-      } catch (err) {
-        console.error('載入資料錯誤', err);
-      }
-    }
-
-    function formatDT(isoStr) {
-      if (!isoStr) return '';
-      // 伺服器回傳格式為 yyyy-MM-dd'T'HH:mm:ss'Z' (string)
-      // 直接顯示較友善
-      return isoStr.replace('T', ' ').replace(/Z$/, '');
-    }
-
-    // render functions
-    function renderExpense(rows) {
-      const el = document.getElementById('expenseList');
-      el.innerHTML = '';
-      // 顯示最近在前
-      rows.slice().reverse().forEach(r => {
-        const li = document.createElement('li');
-        li.className = 'record';
-        li.textContent = `${formatDT(r.date)} | ${r.category} | ${r.item} | ${r.amount} 元 ${r.note ? ' | ' + r.note : ''}`;
-        el.appendChild(li);
-      });
-    }
-
-    function renderWeight(rows) {
-      const el = document.getElementById('weightList');
-      el.innerHTML = '';
-      rows.slice().reverse().forEach(r => {
-        const li = document.createElement('li');
-        li.className = 'record';
-        li.textContent = `${formatDT(r.date_time)} | ${r.weight} kg ${r.note ? ' | ' + r.note : ''}`;
-        el.appendChild(li);
-      });
-    }
-
-    function renderBP(rows) {
-      const el = document.getElementById('bpList');
-      el.innerHTML = '';
-      rows.slice().reverse().forEach(r => {
-        const li = document.createElement('li');
-        li.className = 'record';
-        li.textContent = `${formatDT(r.date_time)} | ${r.systolic}/${r.diastolic} mmHg | 脈搏 ${r.pulse || '-'} ${r.note ? ' | ' + r.note : ''}`;
-        el.appendChild(li);
-      });
-    }
-
-    // 頁面載入時載入每個表格的最新 10 筆以供預覽
-    document.addEventListener('DOMContentLoaded', () => {
-      setDefaults();
-      loadData('expense', 10);
-      loadData('weight', 10);
-      loadData('blood pressure', 10);
-    });
-  </script>
+<script src="script.js"></script>
 </body>
 </html>
