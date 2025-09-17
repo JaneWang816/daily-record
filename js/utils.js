@@ -140,7 +140,7 @@ const Utils = {
    */
   showNotification(message, type = 'info', duration = 3000) {
     // 如果瀏覽器支援原生通知且已獲得權限
-    if (CONFIG.FEATURES.NOTIFICATIONS && 'Notification' in window && Notification.permission === 'granted') {
+    if (typeof CONFIG !== 'undefined' && CONFIG.FEATURES && CONFIG.FEATURES.NOTIFICATIONS && 'Notification' in window && Notification.permission === 'granted') {
       new Notification('日常記錄', { body: message });
     } else {
       // 使用 alert 作為備案
@@ -219,7 +219,7 @@ const Utils = {
    * @returns {string} 格式化後的金額字串
    */
   formatCurrency(amount) {
-    return ' + this.formatNumber(amount, 0);
+    return '$' + this.formatNumber(amount, 0);
   },
 
   /**
@@ -352,7 +352,7 @@ const Utils = {
      * @param {*} data - 額外資料
      */
     log(message, data = null) {
-      if (CONFIG.DEBUG.ENABLED) {
+      if (typeof CONFIG !== 'undefined' && CONFIG.DEBUG && CONFIG.DEBUG.ENABLED) {
         console.log(`[DEBUG] ${message}`, data || '');
       }
     },
@@ -363,7 +363,7 @@ const Utils = {
      * @param {Error} error - 錯誤物件
      */
     error(message, error = null) {
-      if (CONFIG.DEBUG.ENABLED) {
+      if (typeof CONFIG !== 'undefined' && CONFIG.DEBUG && CONFIG.DEBUG.ENABLED) {
         console.error(`[ERROR] ${message}`, error || '');
       }
     },
@@ -374,7 +374,7 @@ const Utils = {
      * @param {Object} data - 請求資料
      */
     logApiRequest(url, data = null) {
-      if (CONFIG.DEBUG.LOG_API_REQUESTS) {
+      if (typeof CONFIG !== 'undefined' && CONFIG.DEBUG && CONFIG.DEBUG.LOG_API_REQUESTS) {
         console.log(`[API] 請求: ${url}`, data || '');
       }
     }
