@@ -47,39 +47,69 @@ class DailyTrackerApp {
    * 檢查必要的依賴
    */
   checkDependencies() {
-    const required = ['Chart', 'CONFIG', 'Utils', 'API'];
-    const missing = required.filter(dep => typeof window[dep] === 'undefined');
+    Utils.debug.log('開始檢查依賴');
     
-    if (missing.length > 0) {
-      throw new Error(`缺少必要的依賴: ${missing.join(', ')}`);
+    // 檢查基礎模組
+    if (typeof CONFIG === 'undefined') {
+      throw new Error('CONFIG 未定義');
     }
-    
-    // 檢查 Chart.js
+    if (typeof Utils === 'undefined') {
+      throw new Error('Utils 未定義');
+    }
     if (typeof Chart === 'undefined') {
       throw new Error('Chart.js 未載入');
+    }
+    
+    // 檢查其他模組（這些可能還沒載入完成，給予警告而非錯誤）
+    const optionalModules = ['API', 'HealthCalculator', 'TabManager', 'FormManager', 'ChartManager'];
+    const missing = optionalModules.filter(dep => typeof window[dep] === 'undefined');
+    
+    if (missing.length > 0) {
+      console.warn('⚠️ 以下模組尚未載入:', missing.join(', '));
+      // 給一些時間讓其他模組載入
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const stillMissing = optionalModules.filter(dep => typeof window[dep] === 'undefined');
+          if (stillMissing.length > 0) {
+            throw new Error(`缺少必要的依賴: ${stillMissing.join(', ')}`);
+          }
+          resolve();
+        }, 100);
+      });
     }
     
     // 檢查 API 配置
     if (!CONFIG.API_URL || CONFIG.API_URL === 'YOUR_SCRIPT_URL') {
       console.warn('⚠️ API URL 尚未設定，請更新 CONFIG.API_URL');
     }
+    
+    Utils.debug.log('依賴檢查完成');
   }
 
   /**
    * 初始化各個模組
    */
   async initializeModules() {
-    // 初始化頁籤管理器
-    TabManager.init();
+    Utils.debug.log('開始初始化模組');
     
-    // 初始化表單管理器
-    FormManager.init();
+    // 確保模組存在後再初始化
+    if (typeof TabManager !== 'undefined' && TabManager.init) {
+      TabManager.init();
+      Utils.debug.log('TabManager 初始化完成');
+    }
+    
+    if (typeof FormManager !== 'undefined' && FormManager.init) {
+      FormManager.init();
+      Utils.debug.log('FormManager 初始化完成');
+    }
     
     // 設定預設日期時間
     Utils.setDefaultDateTime();
     
     // 請求通知權限
     await this.requestNotificationPermission();
+    
+    Utils.debug.log('模組初始化完成');
   }
 
   /**
@@ -167,19 +197,46 @@ class DailyTrackerApp {
    * 載入初始資料
    */
   async loadInitialData() {
+    Utils.debug.log('開始載入初始資料');
+    
+    // 確保 TabManager 存在
+    if (typeof TabManager === 'undefined') {
+      Utils.debug.error('TabManager 未定義，跳過初始資料載入');
+      return;
+    }
+    
     const currentTab = TabManager.getCurrentTab();
+    Utils.debug.log('當前頁籤:', currentTab);
+    
+    // 確保 ChartManager 存在
+    if (typeof ChartManager === 'undefined') {
+      Utils.debug.error('ChartManager 未定義，跳過圖表載入');
+      return;
+    }
     
     // 根據當前頁籤載入對應資料
-    switch (currentTab) {
-      case 'expenseTab':
-        await ChartManager.loadExpenseCharts();
-        break;
-      case 'weightTab':
-        await ChartManager.loadWeightChart();
-        break;
-      case 'bpTab':
-        await ChartManager.loadBPChart();
-        break;
+    try {
+      switch (currentTab) {
+        case 'expenseTab':
+          if (ChartManager.loadExpenseCharts) {
+            await ChartManager.loadExpenseCharts();
+          }
+          break;
+        case 'weightTab':
+          if (ChartManager.loadWeightChart) {
+            await ChartManager.loadWeightChart();
+          }
+          break;
+        case 'bpTab':
+          if (ChartManager.loadBPChart) {
+            await ChartManager.loadBPChart();
+          }
+          break;
+      }
+      Utils.debug.log('初始資料載入完成');
+    } catch (error) {
+      Utils.debug.error('載入初始資料失敗', error);
+      // 不拋出錯誤，讓應用程式繼續運行
     }
   }
 
