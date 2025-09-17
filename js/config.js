@@ -5,7 +5,7 @@
  */
 const CONFIG = {
   // API 設定
-  API_URL: "YOUR_SCRIPT_URL", // 替換成你的 Apps Script Web App URL
+  API_URL: "https://script.google.com/macros/s/AKfycbzHLRV-Ymx3PppIf05WLVr3xl9PvYLjiB4FXXVYnmMYrRxquWdZQHUaduUJpBUtCiORpw/exec", // 替換成你的 Apps Script Web App URL
   API_KEY: "1qazxsw23edc",
   
   // 圖表配置

@@ -19,6 +19,9 @@ class DailyTrackerApp {
       // 檢查必要的依賴
       this.checkDependencies();
       
+      // 等待所有模組載入（因為 script 標籤是按順序載入的）
+      await this.waitForModules();
+      
       // 初始化各個模組
       await this.initializeModules();
       
@@ -28,8 +31,17 @@ class DailyTrackerApp {
       // 設定自動刷新
       this.setupAutoRefresh();
       
-      // 載入初始資料
-      await this.loadInitialData();
+      // 載入初始資料（如果 API 已設定）
+      if (CONFIG.API_URL && CONFIG.API_URL !== 'YOUR_SCRIPT_URL') {
+        await this.loadInitialData();
+      } else {
+        console.warn('⚠️ API 未設定，跳過資料載入');
+        console.log('📋 基礎功能（表單輸入、頁籤切換）仍可正常使用');
+        console.log('🔧 設定步驟：');
+        console.log('   1. 建立 Google Apps Script');
+        console.log('   2. 部署為 Web 應用程式');
+        console.log('   3. 在 config.js 中設定 API_URL');
+      }
       
       this.isInitialized = true;
       Utils.debug.log('應用程式初始化完成');
@@ -40,6 +52,34 @@ class DailyTrackerApp {
     } catch (error) {
       Utils.debug.error('應用程式初始化失敗', error);
       Utils.showError('應用程式載入失敗，請重新整理頁面');
+      throw error;
+    }
+  }
+
+  /**
+   * 等待所有模組載入完成
+   */
+  async waitForModules() {
+    const requiredModules = ['API', 'HealthCalculator', 'TabManager', 'FormManager', 'ChartManager'];
+    let attempts = 0;
+    const maxAttempts = 50; // 最多等待 5 秒
+    
+    while (attempts < maxAttempts) {
+      const missing = requiredModules.filter(module => typeof window[module] === 'undefined');
+      
+      if (missing.length === 0) {
+        Utils.debug.log('所有模組載入完成');
+        return;
+      }
+      
+      Utils.debug.log(`等待模組載入: ${missing.join(', ')} (${attempts + 1}/${maxAttempts})`);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    const stillMissing = requiredModules.filter(module => typeof window[module] === 'undefined');
+    if (stillMissing.length > 0) {
+      throw new Error(`模組載入超時: ${stillMissing.join(', ')}`);
     }
   }
 
@@ -60,30 +100,13 @@ class DailyTrackerApp {
       throw new Error('Chart.js 未載入');
     }
     
-    // 檢查其他模組（這些可能還沒載入完成，給予警告而非錯誤）
-    const optionalModules = ['API', 'HealthCalculator', 'TabManager', 'FormManager', 'ChartManager'];
-    const missing = optionalModules.filter(dep => typeof window[dep] === 'undefined');
-    
-    if (missing.length > 0) {
-      console.warn('⚠️ 以下模組尚未載入:', missing.join(', '));
-      // 給一些時間讓其他模組載入
-      return new Promise(resolve => {
-        setTimeout(() => {
-          const stillMissing = optionalModules.filter(dep => typeof window[dep] === 'undefined');
-          if (stillMissing.length > 0) {
-            throw new Error(`缺少必要的依賴: ${stillMissing.join(', ')}`);
-          }
-          resolve();
-        }, 100);
-      });
-    }
-    
     // 檢查 API 配置
     if (!CONFIG.API_URL || CONFIG.API_URL === 'YOUR_SCRIPT_URL') {
-      console.warn('⚠️ API URL 尚未設定，請更新 CONFIG.API_URL');
+      console.warn('⚠️ API URL 尚未設定，資料載入功能將無法使用');
+      console.log('💡 請在 js/config.js 中設定正確的 Google Apps Script URL');
     }
     
-    Utils.debug.log('依賴檢查完成');
+    Utils.debug.log('基礎依賴檢查完成');
   }
 
   /**
