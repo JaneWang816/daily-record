@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxxatJFq6025n0UK-GeQjRODvZwO9kKL6qJ-GUSjnrNmLnHJmgsmMIvf1TKAmXHjmcV7A/exec"; // 替換成你的 Apps Script Web App URL
+const API_URL = "https://script.google.com/macros/s/AKfycbzHLRV-Ymx3PppIf05WLVr3xl9PvYLjiB4FXXVYnmMYrRxquWdZQHUaduUJpBUtCiORpw/exec"; // 替換成你的 Apps Script Web App URL
 const API_KEY = "1qazxsw23edc";  // 與後端一致
 
 // ---------------------

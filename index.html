@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>我的日常記錄</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/charts.css">
 </head>
 <body>
-
 <header>我的日常記錄</header>
-
 <nav>
   <button class="tab-button active" data-tab="expenseTab">支出</button>
   <button class="tab-button" data-tab="weightTab">體重</button>
@@ -30,8 +30,27 @@
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
   </form>
-  <canvas id="expenseCategoryChart"></canvas>
-  <canvas id="expenseMonthlyChart"></canvas>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div>本月總支出</div>
+      <div class="stat-value" id="monthlyTotal">-</div>
+    </div>
+    <div class="stat-card">
+      <div>今日支出</div>
+      <div class="stat-value" id="dailyTotal">-</div>
+    </div>
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart-title">支出分類統計</div>
+    <canvas id="expenseCategoryChart"></canvas>
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart-title">每月支出趨勢</div>
+    <canvas id="expenseMonthlyChart"></canvas>
+  </div>
 </div>
 
 <!-- 體重 -->
@@ -40,10 +59,20 @@
     <label>日期：<input type="date" name="date" required></label>
     <label>時間：<input type="time" name="time" required></label>
     <label>體重(kg)：<input type="number" step="0.1" name="weight" required></label>
+    <label>腰圍(cm)：<input type="number" step="0.1" name="waist"></label>
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
   </form>
-  <canvas id="weightChart"></canvas>
+  
+  <div id="healthInfo" class="health-info" style="display:none;">
+    <div id="bmiInfo"></div>
+    <div id="waistInfo"></div>
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart-title">體重變化趨勢</div>
+    <canvas id="weightChart"></canvas>
+  </div>
 </div>
 
 <!-- 血壓 -->
@@ -57,10 +86,22 @@
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
   </form>
-  <canvas id="bpChart"></canvas>
+  
+  <div class="chart-container">
+    <div class="chart-title">血壓變化趨勢 (早晚分別顯示)</div>
+    <canvas id="bpChart"></canvas>
+  </div>
 </div>
 
+<!-- JavaScript 引入順序很重要 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/health.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/forms.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

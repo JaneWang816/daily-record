@@ -1,0 +1,92 @@
+/* css/main.css - 主要樣式 */
+
+/* 基礎設定 */
+body {
+  font-family: "Microsoft JhengHei", sans-serif;
+  background: #f8f0fb;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* 標題區域 */
+header {
+  background: #d8a7f0;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 導航區域 */
+nav {
+  display: flex;
+  background: #f3d9fa;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: #f3d9fa;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  background: #e8c5f0;
+}
+
+.tab-button.active {
+  background: #d8a7f0;
+  color: white;
+  border-bottom-color: #a569c7;
+}
+
+/* 頁籤內容 */
+.tab-content {
+  display: none;
+  padding: 1rem;
+  min-height: calc(100vh - 120px);
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  header {
+    font-size: 1.2rem;
+    padding: 0.8rem;
+  }
+  
+  .tab-button {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .tab-content {
+    padding: 0.5rem;
+  }
+}
+
+/* 無障礙設計 */
+.tab-button:focus {
+  outline: 2px solid #a569c7;
+  outline-offset: 2px;
+}
+
+/* 暗色模式準備 */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #2a1a3a;
+    color: #e0e0e0;
+  }
+}

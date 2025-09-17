@@ -1,0 +1,160 @@
+/* css/charts.css - 圖表樣式 */
+
+/* 圖表容器 */
+.chart-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  position: relative;
+}
+
+/* 圖表標題 */
+.chart-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #555;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Canvas 樣式 */
+canvas {
+  max-width: 100%;
+  height: auto !important;
+  border-radius: 8px;
+}
+
+/* 圖表載入動畫 */
+.chart-container.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 2s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 圖表類型特定樣式 */
+.chart-container.expense-category {
+  background: linear-gradient(135deg, #fff5f5, #ffffff);
+}
+
+.chart-container.expense-monthly {
+  background: linear-gradient(135deg, #f0f8ff, #ffffff);
+}
+
+.chart-container.weight-chart {
+  background: linear-gradient(135deg, #f0fff0, #ffffff);
+}
+
+.chart-container.bp-chart {
+  background: linear-gradient(135deg, #fff0f5, #ffffff);
+}
+
+/* 圖表工具提示自定義 */
+.chart-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  font-family: 'Microsoft JhengHei', sans-serif !important;
+}
+
+/* 圖表圖例樣式增強 */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+}
+
+/* 圖表數據點增強 */
+.chart-point {
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 響應式圖表 */
+@media (max-width: 768px) {
+  .chart-container {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* 小螢幕上的圖表調整 */
+  canvas {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    padding: 0.8rem;
+  }
+  
+  .chart-title {
+    font-size: 0.9rem;
+  }
+  
+  canvas {
+    max-height: 250px;
+  }
+}
+
+/* 列印樣式 */
+@media print {
+  .chart-container {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  .chart-title {
+    color: black;
+  }
+}
+
+/* 高對比模式 */
+@media (prefers-contrast: high) {
+  .chart-container {
+    border: 2px solid #000;
+  }
+  
+  .chart-title {
+    color: #000;
+    font-weight: bold;
+  }
+}
