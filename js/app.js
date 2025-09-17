@@ -60,26 +60,56 @@ class DailyTrackerApp {
    * 等待所有模組載入完成
    */
   async waitForModules() {
+    // 立即檢查當前模組狀態
     const requiredModules = ['API', 'HealthCalculator', 'TabManager', 'FormManager', 'ChartManager'];
+    
+    console.log('🔍 檢查模組載入狀態:');
+    requiredModules.forEach(module => {
+      const status = typeof window[module] !== 'undefined' ? '✅' : '❌';
+      console.log(`${status} ${module}: ${typeof window[module]}`);
+    });
+    
+    const missing = requiredModules.filter(module => typeof window[module] === 'undefined');
+    
+    if (missing.length === 0) {
+      console.log('✅ 所有模組都已載入');
+      return;
+    }
+    
+    console.log(`⏳ 等待模組載入: ${missing.join(', ')}`);
+    
+    // 如果有模組未載入，等待一段時間
     let attempts = 0;
-    const maxAttempts = 50; // 最多等待 5 秒
+    const maxAttempts = 10; // 減少等待時間，最多等待 1 秒
     
     while (attempts < maxAttempts) {
-      const missing = requiredModules.filter(module => typeof window[module] === 'undefined');
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      if (missing.length === 0) {
-        Utils.debug.log('所有模組載入完成');
+      const stillMissing = requiredModules.filter(module => typeof window[module] === 'undefined');
+      
+      if (stillMissing.length === 0) {
+        console.log('✅ 所有模組載入完成');
         return;
       }
       
-      Utils.debug.log(`等待模組載入: ${missing.join(', ')} (${attempts + 1}/${maxAttempts})`);
-      await new Promise(resolve => setTimeout(resolve, 100));
       attempts++;
+      console.log(`⏳ 等待中... (${attempts}/${maxAttempts}) 缺少: ${stillMissing.join(', ')}`);
     }
     
-    const stillMissing = requiredModules.filter(module => typeof window[module] === 'undefined');
-    if (stillMissing.length > 0) {
-      throw new Error(`模組載入超時: ${stillMissing.join(', ')}`);
+    // 如果仍有模組未載入，記錄詳細錯誤並繼續執行
+    const finalMissing = requiredModules.filter(module => typeof window[module] === 'undefined');
+    
+    if (finalMissing.length > 0) {
+      console.error('❌ 模組載入失敗:', finalMissing);
+      console.log('🔧 可能的原因:');
+      console.log('   1. JavaScript 檔案路徑錯誤');
+      console.log('   2. JavaScript 檔案內有語法錯誤');
+      console.log('   3. 檔案載入順序問題');
+      console.log('   4. 網路連線問題');
+      
+      // 不拋出錯誤，讓應用程式以降級模式運行
+      console.warn('⚠️ 將以降級模式運行，部分功能可能無法使用');
+      return;
     }
   }
 
