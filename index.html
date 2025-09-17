@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>健康與支出記錄</title>
+<title>我的日常記錄</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<h1>健康與支出記錄</h1>
 
-<div class="tabs">
-  <div class="tab active" data-tab="expense">支出</div>
-  <div class="tab" data-tab="weight">體重</div>
-  <div class="tab" data-tab="bloodPressure">血壓</div>
-</div>
+<header>我的日常記錄</header>
+
+<nav>
+  <button class="tab-button active" data-tab="expenseTab">支出</button>
+  <button class="tab-button" data-tab="weightTab">體重</button>
+  <button class="tab-button" data-tab="bpTab">血壓</button>
+</nav>
 
 <!-- 支出 -->
-<div id="expense" class="content active">
+<div id="expenseTab" class="tab-content active">
   <form id="expenseForm">
-    <label>日期：<input type="date" name="date"></label>
+    <label>日期：<input type="date" name="date" required></label>
     <label>類別：
       <select name="category">
         <option>食</option><option>衣</option><option>住</option><option>行</option>
@@ -26,24 +26,20 @@
       </select>
     </label>
     <label>項目：<input type="text" name="item"></label>
-    <label>金額：<input type="number" name="amount"></label>
+    <label>金額：<input type="number" name="amount" required></label>
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
   </form>
-
-  <h3>分類支出統計</h3>
   <canvas id="expenseCategoryChart"></canvas>
-
-  <h3>每月支出統計</h3>
   <canvas id="expenseMonthlyChart"></canvas>
 </div>
 
 <!-- 體重 -->
-<div id="weight" class="content">
+<div id="weightTab" class="tab-content">
   <form id="weightForm">
-    <label>日期：<input type="date" name="date"></label>
-    <label>時間：<input type="time" name="time"></label>
-    <label>體重：<input type="number" name="weight" step="0.1"></label>
+    <label>日期：<input type="date" name="date" required></label>
+    <label>時間：<input type="time" name="time" required></label>
+    <label>體重(kg)：<input type="number" step="0.1" name="weight" required></label>
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
   </form>
@@ -51,12 +47,12 @@
 </div>
 
 <!-- 血壓 -->
-<div id="bloodPressure" class="content">
+<div id="bpTab" class="tab-content">
   <form id="bpForm">
-    <label>日期：<input type="date" name="date"></label>
-    <label>時間：<input type="time" name="time"></label>
-    <label>收縮壓：<input type="number" name="systolic"></label>
-    <label>舒張壓：<input type="number" name="diastolic"></label>
+    <label>日期：<input type="date" name="date" required></label>
+    <label>時間：<input type="time" name="time" required></label>
+    <label>收縮壓：<input type="number" name="systolic" required></label>
+    <label>舒張壓：<input type="number" name="diastolic" required></label>
     <label>脈搏：<input type="number" name="pulse"></label>
     <label>備註：<input type="text" name="note"></label>
     <button type="submit">送出</button>
@@ -64,6 +60,7 @@
   <canvas id="bpChart"></canvas>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
