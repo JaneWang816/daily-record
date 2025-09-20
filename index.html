@@ -1,3 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日常生活記錄</title>
+    <link rel="manifest" href="data:application/json,{%22name%22:%22日常生活記錄%22,%22short_name%22:%22生活記錄%22,%22description%22:%22個人日常記錄管理系統%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #8b5cf6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .filter-controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .date-inputs {
+            display: none;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-inputs.show {
+            display: flex;
+        }
+
+        .date-inputs input {
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .records-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .record-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #8b5cf6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-content {
+            flex: 1;
+        }
+
+        .record-date {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .record-details {
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+            background: #f8fafc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .health-advice {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .advice-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav {
+                gap: 5px;
+            }
+            
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📊 日常生活記錄</h1>
+            <p>輕鬆管理您的支出、健康與生活數據</p>
+        </header>
+
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showSection('expenses')">💰 支出記錄</button>
+            <button class="nav-btn" onclick="showSection('weight')">⚖️ 體重記錄</button>
+            <button class="nav-btn" onclick="showSection('blood-pressure')">❤️ 血壓記錄</button>
+            <button class="nav-btn" onclick="showSection('exercise')">🏃 運動記錄</button>
+            <button class="nav-btn" onclick="showSection('charts')">📈 圖表分析</button>
+            <button class="nav-btn" onclick="showSection('profile')">👤 基本資料</button>
+            <button class="nav-btn" onclick="showSection('settings')">⚙️ 設定管理</button>
+        </nav>
+
+        <!-- 支出記錄 -->
+        <section id="expenses" class="section active">
+            <div class="card">
+                <h2 class="card-title">💰 新增支出記錄</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>分類</label>
+                        <select id="expenseCategory" required>
+                            <option value="">請選擇分類</option>
+                            <option value="食物">🍽️ 食物</option>
+                            <option value="交通">🚗 交通</option>
+                            <option value="娛樂">🎬 娛樂</option>
+                            <option value="購物">🛍️ 購物</option>
+                            <option value="醫療">🏥 醫療</option>
+                            <option value="其他">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>項目</label>
+                        <input type="text" id="expenseItem" placeholder="例如：午餐" required>
+                    </div>
+                    <div class="form-group">
+                        <label>金額 (NT$)</label>
+                        <input type="number" id="expenseAmount" placeholder="0" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="expenseNote" placeholder="選填..." rows="2"></textarea>
+                    </div>
+                </div>
+                <button class="btn" onclick="addExpense()">新增支出記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 支出記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setExpenseFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="expenseDateInputs">
+                        <input type="date" id="expenseStartDate">
+                        <span>至</span>
+                        <input type="date" id="expenseEndDate">
+                        <button class="filter-btn" onclick="applyExpenseCustomFilter()">套用</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="expenseCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('expenses')">📊 匯出 CSV</button>
+                </div>
+                <div id="expensesList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 體重記錄 -->
+        <section id="weight" class="section">
+            <div class="card">
+                <h2 class="card-title">⚖️ 新增體重記錄</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="weightDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>時間</label>
+                        <input type="time" id="weightTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>體重 (kg)</label>
+                        <input type="number" step="0.1" id="weightValue" placeholder="例如：65.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>腰圍 (cm)</label>
+                        <input type="number" step="0.1" id="waistValue" placeholder="例如：80.5">
+                    </div>
+                </div>
+                <button class="btn" onclick="addWeight()">新增體重記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 體重統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgWeight">--</div>
+                        <div class="stat-label">平均體重</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="latestBMI">--</div>
+                        <div class="stat-label">最新 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weightChange">--</div>
+                        <div class="stat-label">本月變化</div>
+                    </div>
+                </div>
+                <div id="weightAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 健康建議</div>
+                    <div id="weightAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 體重記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setWeightFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setWeightFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setWeightFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setWeightFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setWeightFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="weightDateInputs">
+                        <input type="date" id="weightStartDate">
+                        <span>至</span>
+                        <input type="date" id="weightEndDate">
+                        <button class="filter-btn" onclick="applyWeightCustomFilter()">套用</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
+                </div>
+                <div id="weightsList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 血壓記錄 -->
+        <section id="blood-pressure" class="section">
+            <div class="card">
+                <h2 class="card-title">❤️ 新增血壓記錄</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="bpDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>時間</label>
+                        <input type="time" id="bpTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>收縮壓 (mmHg)</label>
+                        <input type="number" id="systolic" placeholder="例如：120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>舒張壓 (mmHg)</label>
+                        <input type="number" id="diastolic" placeholder="例如：80" required>
+                    </div>
+                    <div class="form-group">
+                        <label>脈搏 (次/分)</label>
+                        <input type="number" id="pulse" placeholder="例如：72">
+                    </div>
+                </div>
+                <button class="btn" onclick="addBloodPressure()">新增血壓記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 血壓統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgSystolic">--</div>
+                        <div class="stat-label">平均收縮壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDiastolic">--</div>
+                        <div class="stat-label">平均舒張壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgPulse">--</div>
+                        <div class="stat-label">平均脈搏</div>
+                    </div>
+                </div>
+                <div id="bpAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 血壓建議</div>
+                    <div id="bpAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 血壓記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setBPFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setBPFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setBPFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setBPFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setBPFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="bpDateInputs">
+                        <input type="date" id="bpStartDate">
+                        <span>至</span>
+                        <input type="date" id="bpEndDate">
+                        <button class="filter-btn" onclick="applyBPCustomFilter()">套用</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
+                </div>
+                <div id="bpList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 運動記錄 -->
+        <section id="exercise" class="section">
+            <div class="card">
+                <h2 class="card-title">🏃 新增運動記錄</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="exerciseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>開始時間</label>
+                        <input type="time" id="exerciseStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>運動類型</label>
+                        <select id="exerciseType" required>
+                            <option value="">請選擇運動類型</option>
+                            <option value="跑步">🏃 跑步</option>
+                            <option value="健走">🚶 健走</option>
+                            <option value="騎車">🚴 騎車</option>
+                            <option value="游泳">🏊 游泳</option>
+                            <option value="重訓">🏋️ 重量訓練</option>
+                            <option value="瑜珈">🧘 瑜珈</option>
+                            <option value="球類">⚽ 球類運動</option>
+                            <option value="其他">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>運動時間 (分鐘)</label>
+                        <input type="number" id="exerciseDuration" placeholder="例如：30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>消耗卡路里 (選填)</label>
+                        <input type="number" id="exerciseCalories" placeholder="例如：200">
+                    </div>
+                    <div class="form-group">
+                        <label>運動強度</label>
+                        <select id="exerciseIntensity">
+                            <option value="輕度">😌 輕度</option>
+                            <option value="中度" selected>😊 中度</option>
+                            <option value="高強度">😤 高強度</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="exerciseNote" placeholder="運動心得、地點等..." rows="2"></textarea>
+                    </div>
+                </div>
+                <button class="btn" onclick="addExercise()">新增運動記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 運動統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyExercises">0</div>
+                        <div class="stat-label">本週運動次數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyDuration">0</div>
+                        <div class="stat-label">本週運動時間 (分)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyCalories">0</div>
+                        <div class="stat-label">本週消耗卡路里</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="exerciseStreak">0</div>
+                        <div class="stat-label">連續運動天數</div>
+                    </div>
+                </div>
+                <div id="exerciseAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 運動建議</div>
+                    <div id="exerciseAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 運動記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setExerciseFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="exerciseDateInputs">
+                        <input type="date" id="exerciseStartDate">
+                        <span>至</span>
+                        <input type="date" id="exerciseEndDate">
+                        <button class="filter-btn" onclick="applyExerciseCustomFilter()">套用</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
+                </div>
+                <div id="exercisesList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 基本資料 -->
+        <section id="profile" class="section">
+            <div class="card">
+                <h2 class="card-title">👤 基本資料設定</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profileName" placeholder="您的姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>生日</label>
+                        <input type="date" id="profileBirthday">
+                    </div>
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="profileGender">
+                            <option value="">請選擇</option>
+                            <option value="male">男性</option>
+                            <option value="female">女性</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="number" id="profileHeight" placeholder="例如：170" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>活動量</label>
+                        <select id="profileActivity">
+                            <option value="sedentary">久坐少動</option>
+                            <option value="light" selected>輕度活動</option>
+                            <option value="moderate">中度活動</option>
+                            <option value="active">積極活動</option>
+                            <option value="very_active">非常活躍</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="saveProfile()">儲存基本資料</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 個人資訊</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayAge">--</div>
+                        <div class="stat-label">年齡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayBMI">--</div>
+                        <div class="stat-label">目前 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayTargetWeight">--</div>
+                        <div class="stat-label">建議體重範圍</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayDailyCalories">--</div>
+                        <div class="stat-label">建議日消耗</div>
+                    </div>
+                </div>
+                <div id="profileAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 個人化建議</div>
+                    <div id="profileAdviceContent"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 圖表分析 -->
+        <section id="charts" class="section">
+            <div class="card">
+                <h2 class="card-title">📈 支出分類分析</h2>
+                <div class="chart-container">
+                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📉 體重變化趨勢</h2>
+                <div class="chart-container">
+                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">💓 血壓監控圖表</h2>
+                <div class="chart-container">
+                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🏃 運動統計圖表</h2>
+                <div class="chart-container">
+                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 設定管理 -->
+        <section id="settings" class="section">
+            <div class="card">
+                <h2 class="card-title">⚙️ 資料管理</h2>
+                <div class="export-buttons">
+                    <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
+                    <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px;">📱 PWA 安裝</h3>
+                    <p style="color: #6b7280; margin-bottom: 15px;">在手機瀏覽器中，您可以將此應用「新增到主畫面」，就像安裝 App 一樣使用。</p>
+                    <button class="btn btn-secondary" onclick="installPWA()" id="installBtn" style="display: none;">📱 安裝應用</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 數據統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalExpenses">0</div>
+                        <div class="stat-label">支出記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalWeight">0</div>
+                        <div class="stat-label">體重記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalBP">0</div>
+                        <div class="stat-label">血壓記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalExercise">0</div>
+                        <div class="stat-label">運動記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="dataSize">0KB</div>
+                        <div class="stat-label">數據大小</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <script>
         // 數據存儲
         let appData = {
@@ -41,182 +842,7 @@
             setupPWAInstall();
         });
 
-        // 日期篩選輔助函數
-        function getDateRange(range) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            
-            switch(range) {
-                case 'week':
-                    const weekAgo = new Date(today);
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    return { start: weekAgo, end: today };
-                    
-                case 'month':
-                    const monthAgo = new Date(today);
-                    monthAgo.setMonth(monthAgo.getMonth() - 1);
-                    return { start: monthAgo, end: today };
-                    
-                case 'quarter':
-                    const quarterAgo = new Date(today);
-                    quarterAgo.setMonth(quarterAgo.getMonth() - 3);
-                    return { start: quarterAgo, end: today };
-                    
-                default:
-                    return { start: null, end: null };
-            }
-        }
-
-        function filterRecordsByDate(records, range, customStart = null, customEnd = null) {
-            if (range === 'all') return records;
-            
-            let dateRange;
-            if (range === 'custom' && customStart && customEnd) {
-                dateRange = {
-                    start: new Date(customStart),
-                    end: new Date(customEnd)
-                };
-            } else {
-                dateRange = getDateRange(range);
-            }
-            
-            if (!dateRange.start || !dateRange.end) return records;
-            
-            return records.filter(record => {
-                const recordDate = new Date(record.date);
-                return recordDate >= dateRange.start && recordDate <= dateRange.end;
-            });
-        }
-
-        // 支出篩選功能
-        function setExpenseFilter(range) {
-            filters.expense = range;
-            
-            // 更新按鈕狀態
-            document.querySelectorAll('#expenses .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // 顯示/隱藏自訂日期輸入
-            const dateInputs = document.getElementById('expenseDateInputs');
-            if (range === 'custom') {
-                dateInputs.classList.add('show');
-            } else {
-                dateInputs.classList.remove('show');
-                updateExpensesList();
-            }
-        }
-
-        function applyExpenseCustomFilter() {
-            const startDate = document.getElementById('expenseStartDate').value;
-            const endDate = document.getElementById('expenseEndDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('請選擇開始和結束日期');
-                return;
-            }
-            
-            filters.expenseCustomStart = startDate;
-            filters.expenseCustomEnd = endDate;
-            updateExpensesList();
-        }
-
-        // 體重篩選功能
-        function setWeightFilter(range) {
-            filters.weight = range;
-            
-            document.querySelectorAll('#weight .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            const dateInputs = document.getElementById('weightDateInputs');
-            if (range === 'custom') {
-                dateInputs.classList.add('show');
-            } else {
-                dateInputs.classList.remove('show');
-                updateWeightsList();
-            }
-        }
-
-        function applyWeightCustomFilter() {
-            const startDate = document.getElementById('weightStartDate').value;
-            const endDate = document.getElementById('weightEndDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('請選擇開始和結束日期');
-                return;
-            }
-            
-            filters.weightCustomStart = startDate;
-            filters.weightCustomEnd = endDate;
-            updateWeightsList();
-        }
-
-        // 血壓篩選功能
-        function setBPFilter(range) {
-            filters.bloodPressure = range;
-            
-            document.querySelectorAll('#blood-pressure .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            const dateInputs = document.getElementById('bpDateInputs');
-            if (range === 'custom') {
-                dateInputs.classList.add('show');
-            } else {
-                dateInputs.classList.remove('show');
-                updateBPList();
-            }
-        }
-
-        function applyBPCustomFilter() {
-            const startDate = document.getElementById('bpStartDate').value;
-            const endDate = document.getElementById('bpEndDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('請選擇開始和結束日期');
-                return;
-            }
-            
-            filters.bpCustomStart = startDate;
-            filters.bpCustomEnd = endDate;
-            updateBPList();
-        }
-
-        // 運動篩選功能
-        function setExerciseFilter(range) {
-            filters.exercise = range;
-            
-            document.querySelectorAll('#exercise .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            const dateInputs = document.getElementById('exerciseDateInputs');
-            if (range === 'custom') {
-                dateInputs.classList.add('show');
-            } else {
-                dateInputs.classList.remove('show');
-                updateExercisesList();
-            }
-        }
-
-        function applyExerciseCustomFilter() {
-            const startDate = document.getElementById('exerciseStartDate').value;
-            const endDate = document.getElementById('exerciseEndDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('請選擇開始和結束日期');
-                return;
-            }
-            
-            filters.exerciseCustomStart = startDate;
-            filters.exerciseCustomEnd = endDate;
-            updateExercisesList();
-        }
+        // 頁面切換
         function showSection(sectionName) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
@@ -309,6 +935,175 @@
                     note: '晨跑'
                 }
             ];
+        }
+
+        // 日期篩選輔助函數
+        function getDateRange(range) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(range) {
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return { start: weekAgo, end: today };
+                    
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    return { start: monthAgo, end: today };
+                    
+                case 'quarter':
+                    const quarterAgo = new Date(today);
+                    quarterAgo.setMonth(quarterAgo.getMonth() - 3);
+                    return { start: quarterAgo, end: today };
+                    
+                default:
+                    return { start: null, end: null };
+            }
+        }
+
+        function filterRecordsByDate(records, range, customStart = null, customEnd = null) {
+            if (range === 'all') return records;
+            
+            let dateRange;
+            if (range === 'custom' && customStart && customEnd) {
+                dateRange = {
+                    start: new Date(customStart),
+                    end: new Date(customEnd)
+                };
+            } else {
+                dateRange = getDateRange(range);
+            }
+            
+            if (!dateRange.start || !dateRange.end) return records;
+            
+            return records.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate >= dateRange.start && recordDate <= dateRange.end;
+            });
+        }
+
+        // 篩選功能
+        function setExpenseFilter(range) {
+            filters.expense = range;
+            updateFilterButtons('expenses', range);
+            const dateInputs = document.getElementById('expenseDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateExpensesList();
+            }
+        }
+
+        function setWeightFilter(range) {
+            filters.weight = range;
+            updateFilterButtons('weight', range);
+            const dateInputs = document.getElementById('weightDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateWeightsList();
+            }
+        }
+
+        function setBPFilter(range) {
+            filters.bloodPressure = range;
+            updateFilterButtons('blood-pressure', range);
+            const dateInputs = document.getElementById('bpDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateBPList();
+            }
+        }
+
+        function setExerciseFilter(range) {
+            filters.exercise = range;
+            updateFilterButtons('exercise', range);
+            const dateInputs = document.getElementById('exerciseDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateExercisesList();
+            }
+        }
+
+        function updateFilterButtons(sectionId, range) {
+            const filterTexts = {
+                'all': '所有記錄',
+                'week': '近七日',
+                'month': '近一個月',
+                'quarter': '近三個月',
+                'custom': '自訂區間'
+            };
+            
+            document.querySelectorAll(`#${sectionId} .filter-btn`).forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(filterTexts[range])) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function applyExpenseCustomFilter() {
+            const startDate = document.getElementById('expenseStartDate').value;
+            const endDate = document.getElementById('expenseEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.expenseCustomStart = startDate;
+            filters.expenseCustomEnd = endDate;
+            updateExpensesList();
+        }
+
+        function applyWeightCustomFilter() {
+            const startDate = document.getElementById('weightStartDate').value;
+            const endDate = document.getElementById('weightEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.weightCustomStart = startDate;
+            filters.weightCustomEnd = endDate;
+            updateWeightsList();
+        }
+
+        function applyBPCustomFilter() {
+            const startDate = document.getElementById('bpStartDate').value;
+            const endDate = document.getElementById('bpEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.bpCustomStart = startDate;
+            filters.bpCustomEnd = endDate;
+            updateBPList();
+        }
+
+        function applyExerciseCustomFilter() {
+            const startDate = document.getElementById('exerciseStartDate').value;
+            const endDate = document.getElementById('exerciseEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.exerciseCustomStart = startDate;
+            filters.exerciseCustomEnd = endDate;
+            updateExercisesList();
         }
 
         // 新增記錄函數
@@ -464,12 +1259,11 @@
             showSuccessMessage('運動記錄已新增！');
         }
 
-        // 更新列表函數（加入篩選）
+        // 更新列表函數
         function updateExpensesList() {
             const container = document.getElementById('expensesList');
             const countElement = document.getElementById('expenseCount');
             
-            // 套用篩選
             let filteredExpenses = filterRecordsByDate(
                 appData.expenses, 
                 filters.expense, 
@@ -527,75 +1321,6 @@
                             ${weight.bmi ? ` | <strong>BMI:</strong> ${weight.bmi}` : ''}
                         </div>
                     </div>
-                    <button class="delete-btn" onclick="deleteRecord('weights', ${weight.id})">刪除</button>
-                </div>
-            `).join('');
-        }
-
-        function updateBPList() {
-            const container = document.getElementById('bpList');
-            const countElement = document.getElementById('bpCount');
-            
-            let filteredBP = filterRecordsByDate(
-                appData.bloodPressure, 
-                filters.bloodPressure, 
-                filters.bpCustomStart, 
-                filters.bpCustomEnd
-            );
-            
-            countElement.textContent = filteredBP.length;
-            
-            if (filteredBP.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無血壓記錄</p>';
-                return;
-            }
-
-            container.innerHTML = filteredBP.map(bp => `
-                <div class="record-item">
-                    <div class="record-content">
-                        <div class="record-date">${bp.date} ${bp.time}</div>
-                        <div class="record-details">
-                            <strong>${bp.systolic}/${bp.diastolic}</strong> mmHg
-                            ${bp.pulse ? ` | <strong>脈搏:</strong> ${bp.pulse} 次/分` : ''}
-                        </div>
-                    </div>
-                    <button class="delete-btn" onclick="deleteRecord('bloodPressure', ${bp.id})">刪除</button>
-                </div>
-            `).join('');
-        }
-
-        function updateExercisesList() {
-            const container = document.getElementById('exercisesList');
-            const countElement = document.getElementById('exerciseCount');
-            
-            let filteredExercises = filterRecordsByDate(
-                appData.exercises, 
-                filters.exercise, 
-                filters.exerciseCustomStart, 
-                filters.exerciseCustomEnd
-            );
-            
-            countElement.textContent = filteredExercises.length;
-            
-            if (filteredExercises.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無運動記錄</p>';
-                return;
-            }
-
-            container.innerHTML = filteredExercises.map(exercise => `
-                <div class="record-item">
-                    <div class="record-content">
-                        <div class="record-date">${exercise.date} ${exercise.startTime}</div>
-                        <div class="record-details">
-                            <strong>${exercise.type}</strong> - ${exercise.duration} 分鐘 (${exercise.intensity})
-                            ${exercise.calories ? ` | <span style="color: #ef4444;">${exercise.calories} 卡路里</span>` : ''}
-                            ${exercise.note ? `<br><small style="color: #6b7280;">${exercise.note}</small>` : ''}
-                        </div>
-                    </div>
-                    <button class="delete-btn" onclick="deleteRecord('exercises', ${exercise.id})">刪除</button>
-                </div>
-            `).join('');
-        }
                     <button class="delete-btn" onclick="deleteRecord('weights', ${weight.id})">刪除</button>
                 </div>
             `).join('');
@@ -987,7 +1712,7 @@
             updateProfileDisplay();
         }
 
-        // 匯出數據
+        // 匯出功能
         function exportData(format = 'json') {
             const timestamp = new Date().toISOString().split('T')[0];
             
@@ -1132,7 +1857,6 @@
             showSuccessMessage('CSV 匯出完成！');
         }
 
-        // 匯入數據
         function importData(input) {
             const file = input.files[0];
             if (!file) return;
@@ -1158,7 +1882,6 @@
             input.value = '';
         }
 
-        // 清除所有數據
         function clearAllData() {
             if (!confirm('確定要清除所有數據嗎？此操作無法復原！')) return;
             
@@ -1182,7 +1905,7 @@
             showSuccessMessage('所有數據已清除！');
         }
 
-        // PWA 安裝
+        // PWA 功能
         let deferredPrompt;
 
         function setupPWAInstall() {
@@ -1206,7 +1929,6 @@
             }
         }
 
-        // 成功訊息提示
         function showSuccessMessage(message) {
             const toast = document.createElement('div');
             toast.style.cssText = `
@@ -1253,787 +1975,4 @@
         }
     </script>
 </body>
-</html><!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日常生活記錄</title>
-    <link rel="manifest" href="data:application/json,{%22name%22:%22日常生活記錄%22,%22short_name%22:%22生活記錄%22,%22description%22:%22個人日常記錄管理系統%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .nav {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            font-size: 14px;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #8b5cf6;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .records-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        .record-item {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #8b5cf6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .record-content {
-            flex: 1;
-        }
-
-        .record-date {
-            font-size: 0.9rem;
-            color: #6b7280;
-            margin-bottom: 5px;
-        }
-
-        .record-details {
-            font-weight: 500;
-        }
-
-        .delete-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .chart-container {
-            height: 300px;
-            margin: 20px 0;
-            background: #f8fafc;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .health-advice {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-
-        .advice-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .filter-controls {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .filter-btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
-        }
-
-        .filter-btn.active {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-
-        .date-inputs {
-            display: none;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .date-inputs.show {
-            display: flex;
-        }
-
-        .date-inputs input {
-            padding: 8px 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .date-inputs input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav {
-                gap: 5px;
-            }
-            
-            .nav-btn {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            
-            .export-buttons {
-                flex-direction: column;
-            }
-
-            .filter-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .filter-btn {
-                margin-bottom: 5px;
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>📊 日常生活記錄</h1>
-            <p>輕鬆管理您的支出、健康與生活數據</p>
-        </header>
-
-        <nav class="nav">
-            <button class="nav-btn active" onclick="showSection('expenses')">💰 支出記錄</button>
-            <button class="nav-btn" onclick="showSection('weight')">⚖️ 體重記錄</button>
-            <button class="nav-btn" onclick="showSection('blood-pressure')">❤️ 血壓記錄</button>
-            <button class="nav-btn" onclick="showSection('exercise')">🏃 運動記錄</button>
-            <button class="nav-btn" onclick="showSection('charts')">📈 圖表分析</button>
-            <button class="nav-btn" onclick="showSection('profile')">👤 基本資料</button>
-            <button class="nav-btn" onclick="showSection('settings')">⚙️ 設定管理</button>
-        </nav>
-
-        <!-- 支出記錄頁面 -->
-        <section id="expenses" class="section active">
-            <div class="card">
-                <h2 class="card-title">💰 新增支出記錄</h2>
-                <form class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="expenseDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>分類</label>
-                        <select id="expenseCategory" required>
-                            <option value="">請選擇分類</option>
-                            <option value="食物">🍽️ 食物</option>
-                            <option value="交通">🚗 交通</option>
-                            <option value="娛樂">🎬 娛樂</option>
-                            <option value="購物">🛍️ 購物</option>
-                            <option value="醫療">🏥 醫療</option>
-                            <option value="其他">📝 其他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>項目</label>
-                        <input type="text" id="expenseItem" placeholder="例如：午餐" required>
-                    </div>
-                    <div class="form-group">
-                        <label>金額 (NT$)</label>
-                        <input type="number" id="expenseAmount" placeholder="0" required>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>備註</label>
-                        <textarea id="expenseNote" placeholder="選填..." rows="2"></textarea>
-                    </div>
-                </form>
-                <button class="btn" onclick="addExpense()">新增支出記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 支出記錄</h3>
-                <div class="filter-controls">
-                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
-                    <button class="filter-btn active" onclick="setExpenseFilter('all')">所有記錄</button>
-                    <button class="filter-btn" onclick="setExpenseFilter('week')">近七日</button>
-                    <button class="filter-btn" onclick="setExpenseFilter('month')">近一個月</button>
-                    <button class="filter-btn" onclick="setExpenseFilter('quarter')">近三個月</button>
-                    <button class="filter-btn" onclick="setExpenseFilter('custom')">自訂區間</button>
-                    <div class="date-inputs" id="expenseDateInputs">
-                        <input type="date" id="expenseStartDate">
-                        <span>至</span>
-                        <input type="date" id="expenseEndDate">
-                        <button class="filter-btn" onclick="applyExpenseCustomFilter()">套用</button>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="expenseCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('expenses')">📊 匯出 CSV</button>
-                </div>
-                <div id="expensesList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 體重記錄頁面 -->
-        <section id="weight" class="section">
-            <div class="card">
-                <h2 class="card-title">⚖️ 新增體重記錄</h2>
-                <form class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="weightDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>時間</label>
-                        <input type="time" id="weightTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>體重 (kg)</label>
-                        <input type="number" step="0.1" id="weightValue" placeholder="例如：65.5" required>
-                    </div>
-                    <div class="form-group">
-                        <label>腰圍 (cm)</label>
-                        <input type="number" step="0.1" id="waistValue" placeholder="例如：80.5">
-                    </div>
-                </form>
-                <button class="btn" onclick="addWeight()">新增體重記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 體重統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgWeight">--</div>
-                        <div class="stat-label">平均體重</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="latestBMI">--</div>
-                        <div class="stat-label">最新 BMI</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weightChange">--</div>
-                        <div class="stat-label">本月變化</div>
-                    </div>
-                </div>
-                <div id="weightAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 健康建議</div>
-                    <div id="weightAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 體重記錄</h3>
-                <div class="filter-controls">
-                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
-                    <button class="filter-btn active" onclick="setWeightFilter('all')">所有記錄</button>
-                    <button class="filter-btn" onclick="setWeightFilter('week')">近七日</button>
-                    <button class="filter-btn" onclick="setWeightFilter('month')">近一個月</button>
-                    <button class="filter-btn" onclick="setWeightFilter('quarter')">近三個月</button>
-                    <button class="filter-btn" onclick="setWeightFilter('custom')">自訂區間</button>
-                    <div class="date-inputs" id="weightDateInputs">
-                        <input type="date" id="weightStartDate">
-                        <span>至</span>
-                        <input type="date" id="weightEndDate">
-                        <button class="filter-btn" onclick="applyWeightCustomFilter()">套用</button>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
-                </div>
-                <div id="weightsList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 血壓記錄頁面 -->
-        <section id="blood-pressure" class="section">
-            <div class="card">
-                <h2 class="card-title">❤️ 新增血壓記錄</h2>
-                <form class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="bpDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>時間</label>
-                        <input type="time" id="bpTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>收縮壓 (mmHg)</label>
-                        <input type="number" id="systolic" placeholder="例如：120" required>
-                    </div>
-                    <div class="form-group">
-                        <label>舒張壓 (mmHg)</label>
-                        <input type="number" id="diastolic" placeholder="例如：80" required>
-                    </div>
-                    <div class="form-group">
-                        <label>脈搏 (次/分)</label>
-                        <input type="number" id="pulse" placeholder="例如：72">
-                    </div>
-                </form>
-                <button class="btn" onclick="addBloodPressure()">新增血壓記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 血壓統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgSystolic">--</div>
-                        <div class="stat-label">平均收縮壓</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgDiastolic">--</div>
-                        <div class="stat-label">平均舒張壓</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgPulse">--</div>
-                        <div class="stat-label">平均脈搏</div>
-                    </div>
-                </div>
-                <div id="bpAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 血壓建議</div>
-                    <div id="bpAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 血壓記錄</h3>
-                <div class="filter-controls">
-                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
-                    <button class="filter-btn active" onclick="setBPFilter('all')">所有記錄</button>
-                    <button class="filter-btn" onclick="setBPFilter('week')">近七日</button>
-                    <button class="filter-btn" onclick="setBPFilter('month')">近一個月</button>
-                    <button class="filter-btn" onclick="setBPFilter('quarter')">近三個月</button>
-                    <button class="filter-btn" onclick="setBPFilter('custom')">自訂區間</button>
-                    <div class="date-inputs" id="bpDateInputs">
-                        <input type="date" id="bpStartDate">
-                        <span>至</span>
-                        <input type="date" id="bpEndDate">
-                        <button class="filter-btn" onclick="applyBPCustomFilter()">套用</button>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
-                </div>
-                <div id="bpList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 運動記錄頁面 -->
-        <section id="exercise" class="section">
-            <div class="card">
-                <h2 class="card-title">🏃 新增運動記錄</h2>
-                <form class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="exerciseDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>開始時間</label>
-                        <input type="time" id="exerciseStartTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>運動類型</label>
-                        <select id="exerciseType" required>
-                            <option value="">請選擇運動類型</option>
-                            <option value="跑步">🏃 跑步</option>
-                            <option value="健走">🚶 健走</option>
-                            <option value="騎車">🚴 騎車</option>
-                            <option value="游泳">🏊 游泳</option>
-                            <option value="重訓">🏋️ 重量訓練</option>
-                            <option value="瑜珈">🧘 瑜珈</option>
-                            <option value="球類">⚽ 球類運動</option>
-                            <option value="其他">📝 其他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>運動時間 (分鐘)</label>
-                        <input type="number" id="exerciseDuration" placeholder="例如：30" required>
-                    </div>
-                    <div class="form-group">
-                        <label>消耗卡路里 (選填)</label>
-                        <input type="number" id="exerciseCalories" placeholder="例如：200">
-                    </div>
-                    <div class="form-group">
-                        <label>運動強度</label>
-                        <select id="exerciseIntensity">
-                            <option value="輕度">😌 輕度</option>
-                            <option value="中度" selected>😊 中度</option>
-                            <option value="高強度">😤 高強度</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>備註</label>
-                        <textarea id="exerciseNote" placeholder="運動心得、地點等..." rows="2"></textarea>
-                    </div>
-                </form>
-                <button class="btn" onclick="addExercise()">新增運動記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 運動統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyExercises">0</div>
-                        <div class="stat-label">本週運動次數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyDuration">0</div>
-                        <div class="stat-label">本週運動時間 (分)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyCalories">0</div>
-                        <div class="stat-label">本週消耗卡路里</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="exerciseStreak">0</div>
-                        <div class="stat-label">連續運動天數</div>
-                    </div>
-                </div>
-                <div id="exerciseAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 運動建議</div>
-                    <div id="exerciseAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 運動記錄</h3>
-                <div class="filter-controls">
-                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
-                    <button class="filter-btn active" onclick="setExerciseFilter('all')">所有記錄</button>
-                    <button class="filter-btn" onclick="setExerciseFilter('week')">近七日</button>
-                    <button class="filter-btn" onclick="setExerciseFilter('month')">近一個月</button>
-                    <button class="filter-btn" onclick="setExerciseFilter('quarter')">近三個月</button>
-                    <button class="filter-btn" onclick="setExerciseFilter('custom')">自訂區間</button>
-                    <div class="date-inputs" id="exerciseDateInputs">
-                        <input type="date" id="exerciseStartDate">
-                        <span>至</span>
-                        <input type="date" id="exerciseEndDate">
-                        <button class="filter-btn" onclick="applyExerciseCustomFilter()">套用</button>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
-                </div>
-                <div id="exercisesList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 基本資料頁面 -->
-        <section id="profile" class="section">
-            <div class="card">
-                <h2 class="card-title">👤 基本資料設定</h2>
-                <form class="form-grid">
-                    <div class="form-group">
-                        <label>姓名</label>
-                        <input type="text" id="profileName" placeholder="您的姓名">
-                    </div>
-                    <div class="form-group">
-                        <label>生日</label>
-                        <input type="date" id="profileBirthday">
-                    </div>
-                    <div class="form-group">
-                        <label>性別</label>
-                        <select id="profileGender">
-                            <option value="">請選擇</option>
-                            <option value="male">男性</option>
-                            <option value="female">女性</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>身高 (cm)</label>
-                        <input type="number" id="profileHeight" placeholder="例如：170" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>活動量</label>
-                        <select id="profileActivity">
-                            <option value="sedentary">久坐少動</option>
-                            <option value="light" selected>輕度活動</option>
-                            <option value="moderate">中度活動</option>
-                            <option value="active">積極活動</option>
-                            <option value="very_active">非常活躍</option>
-                        </select>
-                    </div>
-                </form>
-                <button class="btn" onclick="saveProfile()">儲存基本資料</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 個人資訊</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayAge">--</div>
-                        <div class="stat-label">年齡</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayBMI">--</div>
-                        <div class="stat-label">目前 BMI</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayTargetWeight">--</div>
-                        <div class="stat-label">建議體重範圍</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayDailyCalories">--</div>
-                        <div class="stat-label">建議日消耗</div>
-                    </div>
-                </div>
-                <div id="profileAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 個人化建議</div>
-                    <div id="profileAdviceContent"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 圖表分析頁面 -->
-        <section id="charts" class="section">
-            <div class="card">
-                <h2 class="card-title">📈 支出分類分析</h2>
-                <div class="chart-container">
-                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">📉 體重變化趨勢</h2>
-                <div class="chart-container">
-                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">💓 血壓監控圖表</h2>
-                <div class="chart-container">
-                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">🏃 運動統計圖表</h2>
-                <div class="chart-container">
-                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 設定管理頁面 -->
-        <section id="settings" class="section">
-            <div class="card">
-                <h2 class="card-title">⚙️ 資料管理</h2>
-                <div class="export-buttons">
-                    <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
-                    <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
-                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
-                </div>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
-                
-                <div style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 15px;">📱 PWA 安裝</h3>
-                    <p style="color: #6b7280; margin-bottom: 15px;">在手機瀏覽器中，您可以將此應用「新增到主畫面」，就像安裝 App 一樣使用。</p>
-                    <button class="btn btn-secondary" onclick
+</html>
