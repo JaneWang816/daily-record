@@ -1,326 +1,5 @@
-<div class="stat-card">
-                        <div class="stat-value" id="avgWeight">--</div>
-                        <div class="stat-label">平均體重</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="latestBMI">--</div>
-                        <div class="stat-label">最新 BMI</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weightChange">--</div>
-                        <div class="stat-label">本月變化</div>
-                    </div>
-                </div>
-                <div id="weightAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 健康建議</div>
-                    <div id="weightAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 體重記錄</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
-                </div>
-                <div id="weightsList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 血壓記錄 -->
-        <section id="blood-pressure" class="section">
-            <div class="card fade-in">
-                <h2 class="card-title">❤️ 新增血壓記錄</h2>
-                <form id="bpForm" class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="bpDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>時間</label>
-                        <input type="time" id="bpTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>收縮壓 (mmHg)</label>
-                        <input type="number" id="systolic" placeholder="例如：120" required>
-                    </div>
-                    <div class="form-group">
-                        <label>舒張壓 (mmHg)</label>
-                        <input type="number" id="diastolic" placeholder="例如：80" required>
-                    </div>
-                    <div class="form-group">
-                        <label>脈搏 (次/分)</label>
-                        <input type="number" id="pulse" placeholder="例如：72">
-                    </div>
-                </form>
-                <button type="submit" class="btn" onclick="addBloodPressure()">新增血壓記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 血壓統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgSystolic">--</div>
-                        <div class="stat-label">平均收縮壓</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgDiastolic">--</div>
-                        <div class="stat-label">平均舒張壓</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgPulse">--</div>
-                        <div class="stat-label">平均脈搏</div>
-                    </div>
-                </div>
-                <div id="bpAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 血壓建議</div>
-                    <div id="bpAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 血壓記錄</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
-                </div>
-                <div id="bpList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 運動記錄 -->
-        <section id="exercise" class="section">
-            <div class="card fade-in">
-                <h2 class="card-title">🏃 新增運動記錄</h2>
-                <form id="exerciseForm" class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="exerciseDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>開始時間</label>
-                        <input type="time" id="exerciseStartTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label>運動類型</label>
-                        <select id="exerciseType" required>
-                            <option value="">請選擇運動類型</option>
-                            <option value="跑步">🏃 跑步</option>
-                            <option value="健走">🚶 健走</option>
-                            <option value="騎車">🚴 騎車</option>
-                            <option value="游泳">🏊 游泳</option>
-                            <option value="重訓">🏋️ 重量訓練</option>
-                            <option value="瑜珈">🧘 瑜珈</option>
-                            <option value="球類">⚽ 球類運動</option>
-                            <option value="其他">📝 其他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>運動時間 (分鐘)</label>
-                        <input type="number" id="exerciseDuration" placeholder="例如：30" required>
-                    </div>
-                    <div class="form-group">
-                        <label>消耗卡路里 (選填)</label>
-                        <input type="number" id="exerciseCalories" placeholder="例如：200">
-                    </div>
-                    <div class="form-group">
-                        <label>運動強度</label>
-                        <select id="exerciseIntensity">
-                            <option value="輕度">😌 輕度</option>
-                            <option value="中度" selected>😊 中度</option>
-                            <option value="高強度">😤 高強度</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>備註</label>
-                        <textarea id="exerciseNote" placeholder="運動心得、地點等..." rows="2"></textarea>
-                    </div>
-                </form>
-                <button type="submit" class="btn" onclick="addExercise()">新增運動記錄</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 運動統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyExercises">0</div>
-                        <div class="stat-label">本週運動次數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyDuration">0</div>
-                        <div class="stat-label">本週運動時間 (分)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="weeklyCalories">0</div>
-                        <div class="stat-label">本週消耗卡路里</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="exerciseStreak">0</div>
-                        <div class="stat-label">連續運動天數</div>
-                    </div>
-                </div>
-                <div id="exerciseAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 運動建議</div>
-                    <div id="exerciseAdviceContent"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📋 運動記錄</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
-                </div>
-                <div id="exercisesList" class="records-list"></div>
-            </div>
-        </section>
-
-        <!-- 基本資料 -->
-        <section id="profile" class="section">
-            <div class="card fade-in">
-                <h2 class="card-title">👤 基本資料設定</h2>
-                <form id="profileForm" class="form-grid">
-                    <div class="form-group">
-                        <label>姓名</label>
-                        <input type="text" id="profileName" placeholder="您的姓名">
-                    </div>
-                    <div class="form-group">
-                        <label>生日</label>
-                        <input type="date" id="profileBirthday">
-                    </div>
-                    <div class="form-group">
-                        <label>性別</label>
-                        <select id="profileGender">
-                            <option value="">請選擇</option>
-                            <option value="male">男性</option>
-                            <option value="female">女性</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>身高 (cm)</label>
-                        <input type="number" id="profileHeight" placeholder="例如：170" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>活動量</label>
-                        <select id="profileActivity">
-                            <option value="sedentary">久坐少動</option>
-                            <option value="light" selected>輕度活動</option>
-                            <option value="moderate">中度活動</option>
-                            <option value="active">積極活動</option>
-                            <option value="very_active">非常活躍</option>
-                        </select>
-                    </div>
-                </form>
-                <button type="submit" class="btn" onclick="saveProfile()">儲存基本資料</button>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 個人資訊</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayAge">--</div>
-                        <div class="stat-label">年齡</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayBMI">--</div>
-                        <div class="stat-label">目前 BMI</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayTargetWeight">--</div>
-                        <div class="stat-label">建議體重範圍</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayDailyCalories">--</div>
-                        <div class="stat-label">建議日消耗</div>
-                    </div>
-                </div>
-                <div id="profileAdvice" class="health-advice" style="display: none;">
-                    <div class="advice-title">💡 個人化建議</div>
-                    <div id="profileAdviceContent"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 圖表分析 -->
-        <section id="charts" class="section">
-            <div class="card fade-in">
-                <h2 class="card-title">📈 支出分類分析</h2>
-                <div class="chart-container">
-                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">📉 體重變化趨勢</h2>
-                <div class="chart-container">
-                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">💓 血壓監控圖表</h2>
-                <div class="chart-container">
-                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">🏃 運動統計圖表</h2>
-                <div class="chart-container">
-                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 設定管理 -->
-        <section id="settings" class="section">
-            <div class="card fade-in">
-                <h2 class="card-title">⚙️ 資料管理</h2>
-                <div class="export-buttons">
-                    <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
-                    <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
-                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
-                </div>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
-                
-                <div style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 15px;">📱 PWA 安裝</h3>
-                    <p style="color: #6b7280; margin-bottom: 15px;">在手機瀏覽器中，您可以將此應用「新增到主畫面」，就像安裝 App 一樣使用。</p>
-                    <button class="btn btn-secondary" onclick="installPWA()" id="installBtn" style="display: none;">📱 安裝應用</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 class="card-title">📊 數據統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalExpenses">0</div>
-                        <div class="stat-label">支出記錄數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalWeight">0</div>
-                        <div class="stat-label">體重記錄數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalBP">0</div>
-                        <div class="stat-label">血壓記錄數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalExercise">0</div>
-                        <div class="stat-label">運動記錄數</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="dataSize">0KB</div>
-                        <div class="stat-label">數據大小</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
     <script>
-        // 數據存儲 (在真實環境中使用 localStorage)
+        // 數據存儲
         let appData = {
             expenses: [],
             weights: [],
@@ -354,7 +33,7 @@
             setupPWAInstall();
         });
 
-        // 切換頁面
+        // 頁面切換
         function showSection(sectionName) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
@@ -365,17 +44,13 @@
             });
             
             document.getElementById(sectionName).classList.add('active');
-            updateActiveNav(sectionName);
-        }
-
-        function updateActiveNav(sectionName) {
+            
             const navBtns = document.querySelectorAll('.nav-btn');
-            navBtns.forEach((btn, index) => {
-                const sections = ['expenses', 'weight', 'blood-pressure', 'exercise', 'charts', 'profile', 'settings'];
-                if (sections[index] === sectionName) {
-                    btn.classList.add('active');
-                }
-            });
+            const sections = ['expenses', 'weight', 'blood-pressure', 'exercise', 'charts', 'profile', 'settings'];
+            const index = sections.indexOf(sectionName);
+            if (index !== -1) {
+                navBtns[index].classList.add('active');
+            }
         }
 
         // 載入數據
@@ -387,7 +62,7 @@
 
         // 保存數據
         function saveData() {
-            localStorage.setItem('dailyTrackerData', JSON.stringify(appData));
+            // 在真實環境中使用：localStorage.setItem('dailyTrackerData', JSON.stringify(appData));
             console.log('數據已保存 (演示模式)');
         }
 
@@ -453,7 +128,7 @@
             ];
         }
 
-        // 新增支出記錄
+        // 新增記錄函數
         function addExpense() {
             const date = document.getElementById('expenseDate').value;
             const category = document.getElementById('expenseCategory').value;
@@ -480,13 +155,15 @@
             updateExpensesList();
             updateStats();
 
-            document.getElementById('expenseForm').reset();
             document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expenseCategory').value = '';
+            document.getElementById('expenseItem').value = '';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseNote').value = '';
             
             showSuccessMessage('支出記錄已新增！');
         }
 
-        // 新增體重記錄
         function addWeight() {
             const date = document.getElementById('weightDate').value;
             const time = document.getElementById('weightTime').value;
@@ -520,15 +197,14 @@
             updateWeightStats();
             updateProfileDisplay();
 
-            document.getElementById('weightForm').reset();
             document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('weightTime').value = new Date().toTimeString().slice(0, 5);
-            updateHeightInWeightForm();
+            document.getElementById('weightValue').value = '';
+            document.getElementById('waistValue').value = '';
             
             showSuccessMessage('體重記錄已新增！');
         }
 
-        // 新增血壓記錄
         function addBloodPressure() {
             const date = document.getElementById('bpDate').value;
             const time = document.getElementById('bpTime').value;
@@ -555,14 +231,15 @@
             updateBPList();
             updateBPStats();
 
-            document.getElementById('bpForm').reset();
             document.getElementById('bpDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('bpTime').value = new Date().toTimeString().slice(0, 5);
+            document.getElementById('systolic').value = '';
+            document.getElementById('diastolic').value = '';
+            document.getElementById('pulse').value = '';
             
             showSuccessMessage('血壓記錄已新增！');
         }
 
-        // 新增運動記錄
         function addExercise() {
             const date = document.getElementById('exerciseDate').value;
             const startTime = document.getElementById('exerciseStartTime').value;
@@ -593,10 +270,13 @@
             updateExercisesList();
             updateExerciseStats();
 
-            document.getElementById('exerciseForm').reset();
             document.getElementById('exerciseDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('exerciseStartTime').value = new Date().toTimeString().slice(0, 5);
+            document.getElementById('exerciseType').value = '';
+            document.getElementById('exerciseDuration').value = '';
+            document.getElementById('exerciseCalories').value = '';
             document.getElementById('exerciseIntensity').value = '中度';
+            document.getElementById('exerciseNote').value = '';
             
             showSuccessMessage('運動記錄已新增！');
         }
@@ -883,7 +563,6 @@
 
             saveData();
             updateProfileDisplay();
-            updateHeightInWeightForm();
             showSuccessMessage('基本資料已儲存！');
         }
 
@@ -896,7 +575,6 @@
                 document.getElementById('profileActivity').value = appData.profile.activity || 'light';
                 
                 updateProfileDisplay();
-                updateHeightInWeightForm();
             }
         }
 
@@ -1002,20 +680,6 @@
                 }
             } else {
                 document.getElementById('profileAdvice').style.display = 'none';
-            }
-        }
-
-        function updateHeightInWeightForm() {
-            const heightInput = document.getElementById('heightValue');
-            if (appData.profile && appData.profile.height) {
-                heightInput.value = appData.profile.height;
-                heightInput.placeholder = appData.profile.height + ' cm (來自基本資料)';
-                heightInput.style.background = '#f8fafc';
-                heightInput.readOnly = true;
-            } else {
-                heightInput.placeholder = '請先設定基本資料';
-                heightInput.style.background = '#f3f4f6';
-                heightInput.readOnly = true;
             }
         }
 
@@ -1184,7 +848,7 @@
             link.download = filename;
             link.click();
             
-            showSuccessMessage(`CSV 匯出完成！`);
+            showSuccessMessage('CSV 匯出完成！');
         }
 
         // 匯入數據
@@ -1296,7 +960,7 @@
             }, 3000);
         }
 
-        // Service Worker 註冊 (PWA 離線功能)
+        // Service Worker 註冊
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="daily-tracker-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{return response||fetch(event.request)}))});')
                 .then(registration => {
@@ -1308,8 +972,7 @@
         }
     </script>
 </body>
-</html>
-                <!DOCTYPE html>
+</html><!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -1440,7 +1103,6 @@
             font-size: 16px;
             font-weight: 500;
             transition: all 0.3s ease;
-            text-transform: none;
         }
 
         .btn:hover {
@@ -1462,6 +1124,7 @@
 
         .section.active {
             display: block;
+            animation: fadeIn 0.3s ease-in;
         }
 
         .records-list {
@@ -1586,25 +1249,6 @@
             }
         }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #8b5cf6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1628,11 +1272,11 @@
             <button class="nav-btn" onclick="showSection('settings')">⚙️ 設定管理</button>
         </nav>
 
-        <!-- 支出記錄 -->
+        <!-- 支出記錄頁面 -->
         <section id="expenses" class="section active">
-            <div class="card fade-in">
+            <div class="card">
                 <h2 class="card-title">💰 新增支出記錄</h2>
-                <form id="expenseForm" class="form-grid">
+                <form class="form-grid">
                     <div class="form-group">
                         <label>日期</label>
                         <input type="date" id="expenseDate" required>
@@ -1662,7 +1306,7 @@
                         <textarea id="expenseNote" placeholder="選填..." rows="2"></textarea>
                     </div>
                 </form>
-                <button type="submit" class="btn" onclick="addExpense()">新增支出記錄</button>
+                <button class="btn" onclick="addExpense()">新增支出記錄</button>
             </div>
 
             <div class="card">
@@ -1675,11 +1319,11 @@
             </div>
         </section>
 
-        <!-- 體重記錄 -->
+        <!-- 體重記錄頁面 -->
         <section id="weight" class="section">
-            <div class="card fade-in">
+            <div class="card">
                 <h2 class="card-title">⚖️ 新增體重記錄</h2>
-                <form id="weightForm" class="form-grid">
+                <form class="form-grid">
                     <div class="form-group">
                         <label>日期</label>
                         <input type="date" id="weightDate" required>
@@ -1696,12 +1340,8 @@
                         <label>腰圍 (cm)</label>
                         <input type="number" step="0.1" id="waistValue" placeholder="例如：80.5">
                     </div>
-                    <div class="form-group">
-                        <label>身高 (cm)</label>
-                        <input type="text" id="heightValue" placeholder="請先設定基本資料" readonly style="background: #f3f4f6; cursor: pointer;" onclick="showSection('profile'); updateActiveNav('profile');">
-                    </div>
                 </form>
-                <button type="submit" class="btn" onclick="addWeight()">新增體重記錄</button>
+                <button class="btn" onclick="addWeight()">新增體重記錄</button>
             </div>
 
             <div class="card">
@@ -1709,4 +1349,291 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="avgWeight">--</div>
-                        <div class="stat-label">平均體重</div
+                        <div class="stat-label">平均體重</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="latestBMI">--</div>
+                        <div class="stat-label">最新 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weightChange">--</div>
+                        <div class="stat-label">本月變化</div>
+                    </div>
+                </div>
+                <div id="weightAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 健康建議</div>
+                    <div id="weightAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 體重記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
+                </div>
+                <div id="weightsList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 血壓記錄頁面 -->
+        <section id="blood-pressure" class="section">
+            <div class="card">
+                <h2 class="card-title">❤️ 新增血壓記錄</h2>
+                <form class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="bpDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>時間</label>
+                        <input type="time" id="bpTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>收縮壓 (mmHg)</label>
+                        <input type="number" id="systolic" placeholder="例如：120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>舒張壓 (mmHg)</label>
+                        <input type="number" id="diastolic" placeholder="例如：80" required>
+                    </div>
+                    <div class="form-group">
+                        <label>脈搏 (次/分)</label>
+                        <input type="number" id="pulse" placeholder="例如：72">
+                    </div>
+                </form>
+                <button class="btn" onclick="addBloodPressure()">新增血壓記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 血壓統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgSystolic">--</div>
+                        <div class="stat-label">平均收縮壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDiastolic">--</div>
+                        <div class="stat-label">平均舒張壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgPulse">--</div>
+                        <div class="stat-label">平均脈搏</div>
+                    </div>
+                </div>
+                <div id="bpAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 血壓建議</div>
+                    <div id="bpAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 血壓記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
+                </div>
+                <div id="bpList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 運動記錄頁面 -->
+        <section id="exercise" class="section">
+            <div class="card">
+                <h2 class="card-title">🏃 新增運動記錄</h2>
+                <form class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="exerciseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>開始時間</label>
+                        <input type="time" id="exerciseStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>運動類型</label>
+                        <select id="exerciseType" required>
+                            <option value="">請選擇運動類型</option>
+                            <option value="跑步">🏃 跑步</option>
+                            <option value="健走">🚶 健走</option>
+                            <option value="騎車">🚴 騎車</option>
+                            <option value="游泳">🏊 游泳</option>
+                            <option value="重訓">🏋️ 重量訓練</option>
+                            <option value="瑜珈">🧘 瑜珈</option>
+                            <option value="球類">⚽ 球類運動</option>
+                            <option value="其他">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>運動時間 (分鐘)</label>
+                        <input type="number" id="exerciseDuration" placeholder="例如：30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>消耗卡路里 (選填)</label>
+                        <input type="number" id="exerciseCalories" placeholder="例如：200">
+                    </div>
+                    <div class="form-group">
+                        <label>運動強度</label>
+                        <select id="exerciseIntensity">
+                            <option value="輕度">😌 輕度</option>
+                            <option value="中度" selected>😊 中度</option>
+                            <option value="高強度">😤 高強度</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="exerciseNote" placeholder="運動心得、地點等..." rows="2"></textarea>
+                    </div>
+                </form>
+                <button class="btn" onclick="addExercise()">新增運動記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 運動統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyExercises">0</div>
+                        <div class="stat-label">本週運動次數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyDuration">0</div>
+                        <div class="stat-label">本週運動時間 (分)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyCalories">0</div>
+                        <div class="stat-label">本週消耗卡路里</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="exerciseStreak">0</div>
+                        <div class="stat-label">連續運動天數</div>
+                    </div>
+                </div>
+                <div id="exerciseAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 運動建議</div>
+                    <div id="exerciseAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 運動記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
+                </div>
+                <div id="exercisesList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 基本資料頁面 -->
+        <section id="profile" class="section">
+            <div class="card">
+                <h2 class="card-title">👤 基本資料設定</h2>
+                <form class="form-grid">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profileName" placeholder="您的姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>生日</label>
+                        <input type="date" id="profileBirthday">
+                    </div>
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="profileGender">
+                            <option value="">請選擇</option>
+                            <option value="male">男性</option>
+                            <option value="female">女性</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="number" id="profileHeight" placeholder="例如：170" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>活動量</label>
+                        <select id="profileActivity">
+                            <option value="sedentary">久坐少動</option>
+                            <option value="light" selected>輕度活動</option>
+                            <option value="moderate">中度活動</option>
+                            <option value="active">積極活動</option>
+                            <option value="very_active">非常活躍</option>
+                        </select>
+                    </div>
+                </form>
+                <button class="btn" onclick="saveProfile()">儲存基本資料</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 個人資訊</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayAge">--</div>
+                        <div class="stat-label">年齡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayBMI">--</div>
+                        <div class="stat-label">目前 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayTargetWeight">--</div>
+                        <div class="stat-label">建議體重範圍</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayDailyCalories">--</div>
+                        <div class="stat-label">建議日消耗</div>
+                    </div>
+                </div>
+                <div id="profileAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 個人化建議</div>
+                    <div id="profileAdviceContent"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 圖表分析頁面 -->
+        <section id="charts" class="section">
+            <div class="card">
+                <h2 class="card-title">📈 支出分類分析</h2>
+                <div class="chart-container">
+                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📉 體重變化趨勢</h2>
+                <div class="chart-container">
+                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">💓 血壓監控圖表</h2>
+                <div class="chart-container">
+                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🏃 運動統計圖表</h2>
+                <div class="chart-container">
+                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 設定管理頁面 -->
+        <section id="settings" class="section">
+            <div class="card">
+                <h2 class="card-title">⚙️ 資料管理</h2>
+                <div class="export-buttons">
+                    <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
+                    <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px;">📱 PWA 安裝</h3>
+                    <p style="color: #6b7280; margin-bottom: 15px;">在手機瀏覽器中，您可以將此應用「新增到主畫面」，就像安裝 App 一樣使用。</p>
+                    <button class="btn btn-secondary" onclick
