@@ -1,119 +1,1712 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<title>我的日常記錄</title>
-<link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/charts.css">
-</head>
-<body>
-<header>我的日常記錄</header>
-<nav>
-  <button class="tab-button active" data-tab="expenseTab">支出</button>
-  <button class="tab-button" data-tab="weightTab">體重</button>
-  <button class="tab-button" data-tab="bpTab">血壓</button>
-</nav>
+<div class="stat-card">
+                        <div class="stat-value" id="avgWeight">--</div>
+                        <div class="stat-label">平均體重</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="latestBMI">--</div>
+                        <div class="stat-label">最新 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weightChange">--</div>
+                        <div class="stat-label">本月變化</div>
+                    </div>
+                </div>
+                <div id="weightAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 健康建議</div>
+                    <div id="weightAdviceContent"></div>
+                </div>
+            </div>
 
-<!-- 支出 -->
-<div id="expenseTab" class="tab-content active">
-  <form id="expenseForm">
-    <label>日期：<input type="date" name="date" required></label>
-    <label>類別：
-      <select name="category">
-        <option>食</option><option>衣</option><option>住</option><option>行</option>
-        <option>育</option><option>樂</option><option>健康</option><option>規費</option>
-      </select>
-    </label>
-    <label>項目：<input type="text" name="item"></label>
-    <label>金額：<input type="number" name="amount" required></label>
-    <label>備註：<input type="text" name="note"></label>
-    <button type="submit">送出</button>
-  </form>
-  
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div>本月總支出</div>
-      <div class="stat-value" id="monthlyTotal">-</div>
+            <div class="card">
+                <h3 class="card-title">📋 體重記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
+                </div>
+                <div id="weightsList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 血壓記錄 -->
+        <section id="blood-pressure" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">❤️ 新增血壓記錄</h2>
+                <form id="bpForm" class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="bpDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>時間</label>
+                        <input type="time" id="bpTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>收縮壓 (mmHg)</label>
+                        <input type="number" id="systolic" placeholder="例如：120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>舒張壓 (mmHg)</label>
+                        <input type="number" id="diastolic" placeholder="例如：80" required>
+                    </div>
+                    <div class="form-group">
+                        <label>脈搏 (次/分)</label>
+                        <input type="number" id="pulse" placeholder="例如：72">
+                    </div>
+                </form>
+                <button type="submit" class="btn" onclick="addBloodPressure()">新增血壓記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 血壓統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgSystolic">--</div>
+                        <div class="stat-label">平均收縮壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDiastolic">--</div>
+                        <div class="stat-label">平均舒張壓</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgPulse">--</div>
+                        <div class="stat-label">平均脈搏</div>
+                    </div>
+                </div>
+                <div id="bpAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 血壓建議</div>
+                    <div id="bpAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 血壓記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
+                </div>
+                <div id="bpList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 運動記錄 -->
+        <section id="exercise" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">🏃 新增運動記錄</h2>
+                <form id="exerciseForm" class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="exerciseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>開始時間</label>
+                        <input type="time" id="exerciseStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>運動類型</label>
+                        <select id="exerciseType" required>
+                            <option value="">請選擇運動類型</option>
+                            <option value="跑步">🏃 跑步</option>
+                            <option value="健走">🚶 健走</option>
+                            <option value="騎車">🚴 騎車</option>
+                            <option value="游泳">🏊 游泳</option>
+                            <option value="重訓">🏋️ 重量訓練</option>
+                            <option value="瑜珈">🧘 瑜珈</option>
+                            <option value="球類">⚽ 球類運動</option>
+                            <option value="其他">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>運動時間 (分鐘)</label>
+                        <input type="number" id="exerciseDuration" placeholder="例如：30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>消耗卡路里 (選填)</label>
+                        <input type="number" id="exerciseCalories" placeholder="例如：200">
+                    </div>
+                    <div class="form-group">
+                        <label>運動強度</label>
+                        <select id="exerciseIntensity">
+                            <option value="輕度">😌 輕度</option>
+                            <option value="中度" selected>😊 中度</option>
+                            <option value="高強度">😤 高強度</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="exerciseNote" placeholder="運動心得、地點等..." rows="2"></textarea>
+                    </div>
+                </form>
+                <button type="submit" class="btn" onclick="addExercise()">新增運動記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 運動統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyExercises">0</div>
+                        <div class="stat-label">本週運動次數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyDuration">0</div>
+                        <div class="stat-label">本週運動時間 (分)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weeklyCalories">0</div>
+                        <div class="stat-label">本週消耗卡路里</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="exerciseStreak">0</div>
+                        <div class="stat-label">連續運動天數</div>
+                    </div>
+                </div>
+                <div id="exerciseAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 運動建議</div>
+                    <div id="exerciseAdviceContent"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 運動記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
+                </div>
+                <div id="exercisesList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 基本資料 -->
+        <section id="profile" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">👤 基本資料設定</h2>
+                <form id="profileForm" class="form-grid">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profileName" placeholder="您的姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>生日</label>
+                        <input type="date" id="profileBirthday">
+                    </div>
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="profileGender">
+                            <option value="">請選擇</option>
+                            <option value="male">男性</option>
+                            <option value="female">女性</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="number" id="profileHeight" placeholder="例如：170" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>活動量</label>
+                        <select id="profileActivity">
+                            <option value="sedentary">久坐少動</option>
+                            <option value="light" selected>輕度活動</option>
+                            <option value="moderate">中度活動</option>
+                            <option value="active">積極活動</option>
+                            <option value="very_active">非常活躍</option>
+                        </select>
+                    </div>
+                </form>
+                <button type="submit" class="btn" onclick="saveProfile()">儲存基本資料</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 個人資訊</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayAge">--</div>
+                        <div class="stat-label">年齡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayBMI">--</div>
+                        <div class="stat-label">目前 BMI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayTargetWeight">--</div>
+                        <div class="stat-label">建議體重範圍</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayDailyCalories">--</div>
+                        <div class="stat-label">建議日消耗</div>
+                    </div>
+                </div>
+                <div id="profileAdvice" class="health-advice" style="display: none;">
+                    <div class="advice-title">💡 個人化建議</div>
+                    <div id="profileAdviceContent"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 圖表分析 -->
+        <section id="charts" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">📈 支出分類分析</h2>
+                <div class="chart-container">
+                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📉 體重變化趨勢</h2>
+                <div class="chart-container">
+                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">💓 血壓監控圖表</h2>
+                <div class="chart-container">
+                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🏃 運動統計圖表</h2>
+                <div class="chart-container">
+                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 設定管理 -->
+        <section id="settings" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">⚙️ 資料管理</h2>
+                <div class="export-buttons">
+                    <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
+                    <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px;">📱 PWA 安裝</h3>
+                    <p style="color: #6b7280; margin-bottom: 15px;">在手機瀏覽器中，您可以將此應用「新增到主畫面」，就像安裝 App 一樣使用。</p>
+                    <button class="btn btn-secondary" onclick="installPWA()" id="installBtn" style="display: none;">📱 安裝應用</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 數據統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalExpenses">0</div>
+                        <div class="stat-label">支出記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalWeight">0</div>
+                        <div class="stat-label">體重記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalBP">0</div>
+                        <div class="stat-label">血壓記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalExercise">0</div>
+                        <div class="stat-label">運動記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="dataSize">0KB</div>
+                        <div class="stat-label">數據大小</div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-    <div class="stat-card">
-      <div>今日支出</div>
-      <div class="stat-value" id="dailyTotal">-</div>
-    </div>
-  </div>
-  
-  <div class="chart-container">
-    <div class="chart-title">支出分類統計</div>
-    <canvas id="expenseCategoryChart"></canvas>
-  </div>
-  
-  <div class="chart-container">
-    <div class="chart-title">每月支出趨勢</div>
-    <canvas id="expenseMonthlyChart"></canvas>
-  </div>
-</div>
 
-<!-- 體重 -->
-<div id="weightTab" class="tab-content">
-  <form id="weightForm">
-    <label>日期：<input type="date" name="date" required></label>
-    <label>時間：<input type="time" name="time" required></label>
-    <label>體重(kg)：<input type="number" step="0.1" name="weight" required></label>
-    <label>腰圍(cm)：<input type="number" step="0.1" name="waist"></label>
-    <label>備註：<input type="text" name="note"></label>
-    <button type="submit">送出</button>
-  </form>
-  
-  <div id="healthInfo" class="health-info" style="display:none;">
-    <div id="bmiInfo"></div>
-    <div id="waistInfo"></div>
-  </div>
-  
-  <div class="chart-container">
-    <div class="chart-title">體重變化趨勢</div>
-    <canvas id="weightChart"></canvas>
-  </div>
-</div>
+    <script>
+        // 數據存儲 (在真實環境中使用 localStorage)
+        let appData = {
+            expenses: [],
+            weights: [],
+            bloodPressure: [],
+            exercises: [],
+            profile: {
+                name: '',
+                birthday: '',
+                gender: '',
+                height: '',
+                activity: 'light'
+            }
+        };
 
-<!-- 血壓 -->
-<div id="bpTab" class="tab-content">
-  <form id="bpForm">
-    <label>日期：<input type="date" name="date" required></label>
-    <label>時間：<input type="time" name="time" required></label>
-    <label>收縮壓：<input type="number" name="systolic" required></label>
-    <label>舒張壓：<input type="number" name="diastolic" required></label>
-    <label>脈搏：<input type="number" name="pulse"></label>
-    <label>備註：<input type="text" name="note"></label>
-    <button type="submit">送出</button>
-  </form>
-  
-  <div class="chart-container">
-    <div class="chart-title">血壓變化趨勢 (早晚分別顯示)</div>
-    <canvas id="bpChart"></canvas>
-  </div>
-</div>
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date().toTimeString().slice(0, 5);
+            
+            document.getElementById('expenseDate').value = today;
+            document.getElementById('weightDate').value = today;
+            document.getElementById('weightTime').value = now;
+            document.getElementById('bpDate').value = today;
+            document.getElementById('bpTime').value = now;
+            document.getElementById('exerciseDate').value = today;
+            document.getElementById('exerciseStartTime').value = now;
 
-<!-- JavaScript 引入順序很重要 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/config.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/api.js"></script>
-<script src="js/health.js"></script>
-<script src="js/tabs.js"></script>
-<script src="js/forms.js"></script>
-<script src="js/charts.js"></script>
-<script>
-  // 立即檢查模組載入狀態
-  console.log('🔍 檢查模組載入狀態:');
-  console.log('CONFIG:', typeof CONFIG);
-  console.log('Utils:', typeof Utils);
-  console.log('API:', typeof API);
-  console.log('HealthCalculator:', typeof HealthCalculator);
-  console.log('TabManager:', typeof TabManager);
-  console.log('FormManager:', typeof FormManager);
-  console.log('ChartManager:', typeof ChartManager);
-  console.log('Chart.js:', typeof Chart);
-</script>
-<script src="js/app.js"></script>
+            loadData();
+            updateAllDisplays();
+            loadProfile();
+            setupPWAInstall();
+        });
+
+        // 切換頁面
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(sectionName).classList.add('active');
+            updateActiveNav(sectionName);
+        }
+
+        function updateActiveNav(sectionName) {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach((btn, index) => {
+                const sections = ['expenses', 'weight', 'blood-pressure', 'exercise', 'charts', 'profile', 'settings'];
+                if (sections[index] === sectionName) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // 載入數據
+        function loadData() {
+            if (appData.expenses.length === 0) {
+                addSampleData();
+            }
+        }
+
+        // 保存數據
+        function saveData() {
+            localStorage.setItem('dailyTrackerData', JSON.stringify(appData));
+            console.log('數據已保存 (演示模式)');
+        }
+
+        // 添加示例數據
+        function addSampleData() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            appData.expenses = [
+                {
+                    id: Date.now() + 1,
+                    date: today.toISOString().split('T')[0],
+                    category: '食物',
+                    item: '午餐',
+                    amount: 150,
+                    note: '便當'
+                },
+                {
+                    id: Date.now() + 2,
+                    date: yesterday.toISOString().split('T')[0],
+                    category: '交通',
+                    item: '捷運',
+                    amount: 30,
+                    note: ''
+                }
+            ];
+
+            appData.weights = [
+                {
+                    id: Date.now() + 3,
+                    date: today.toISOString().split('T')[0],
+                    time: '08:00',
+                    weight: 65.5,
+                    waist: 80,
+                    height: 170,
+                    bmi: 22.7
+                }
+            ];
+
+            appData.bloodPressure = [
+                {
+                    id: Date.now() + 4,
+                    date: today.toISOString().split('T')[0],
+                    time: '09:00',
+                    systolic: 120,
+                    diastolic: 80,
+                    pulse: 72
+                }
+            ];
+
+            appData.exercises = [
+                {
+                    id: Date.now() + 5,
+                    date: today.toISOString().split('T')[0],
+                    startTime: '07:00',
+                    type: '跑步',
+                    duration: 30,
+                    calories: 200,
+                    intensity: '中度',
+                    note: '晨跑'
+                }
+            ];
+        }
+
+        // 新增支出記錄
+        function addExpense() {
+            const date = document.getElementById('expenseDate').value;
+            const category = document.getElementById('expenseCategory').value;
+            const item = document.getElementById('expenseItem').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const note = document.getElementById('expenseNote').value;
+
+            if (!date || !category || !item || !amount) {
+                alert('請填寫所有必填欄位');
+                return;
+            }
+
+            const expense = {
+                id: Date.now(),
+                date,
+                category,
+                item,
+                amount,
+                note
+            };
+
+            appData.expenses.unshift(expense);
+            saveData();
+            updateExpensesList();
+            updateStats();
+
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            
+            showSuccessMessage('支出記錄已新增！');
+        }
+
+        // 新增體重記錄
+        function addWeight() {
+            const date = document.getElementById('weightDate').value;
+            const time = document.getElementById('weightTime').value;
+            const weight = parseFloat(document.getElementById('weightValue').value);
+            const waist = parseFloat(document.getElementById('waistValue').value) || null;
+
+            if (!date || !time || !weight) {
+                alert('請填寫日期、時間和體重');
+                return;
+            }
+
+            const height = appData.profile.height;
+            let bmi = null;
+            if (height) {
+                bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+            }
+
+            const weightRecord = {
+                id: Date.now(),
+                date,
+                time,
+                weight,
+                waist,
+                height,
+                bmi: parseFloat(bmi)
+            };
+
+            appData.weights.unshift(weightRecord);
+            saveData();
+            updateWeightsList();
+            updateWeightStats();
+            updateProfileDisplay();
+
+            document.getElementById('weightForm').reset();
+            document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('weightTime').value = new Date().toTimeString().slice(0, 5);
+            updateHeightInWeightForm();
+            
+            showSuccessMessage('體重記錄已新增！');
+        }
+
+        // 新增血壓記錄
+        function addBloodPressure() {
+            const date = document.getElementById('bpDate').value;
+            const time = document.getElementById('bpTime').value;
+            const systolic = parseInt(document.getElementById('systolic').value);
+            const diastolic = parseInt(document.getElementById('diastolic').value);
+            const pulse = parseInt(document.getElementById('pulse').value) || null;
+
+            if (!date || !time || !systolic || !diastolic) {
+                alert('請填寫日期、時間、收縮壓和舒張壓');
+                return;
+            }
+
+            const bpRecord = {
+                id: Date.now(),
+                date,
+                time,
+                systolic,
+                diastolic,
+                pulse
+            };
+
+            appData.bloodPressure.unshift(bpRecord);
+            saveData();
+            updateBPList();
+            updateBPStats();
+
+            document.getElementById('bpForm').reset();
+            document.getElementById('bpDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('bpTime').value = new Date().toTimeString().slice(0, 5);
+            
+            showSuccessMessage('血壓記錄已新增！');
+        }
+
+        // 新增運動記錄
+        function addExercise() {
+            const date = document.getElementById('exerciseDate').value;
+            const startTime = document.getElementById('exerciseStartTime').value;
+            const type = document.getElementById('exerciseType').value;
+            const duration = parseInt(document.getElementById('exerciseDuration').value);
+            const calories = parseInt(document.getElementById('exerciseCalories').value) || null;
+            const intensity = document.getElementById('exerciseIntensity').value;
+            const note = document.getElementById('exerciseNote').value;
+
+            if (!date || !startTime || !type || !duration) {
+                alert('請填寫日期、時間、運動類型和運動時間');
+                return;
+            }
+
+            const exercise = {
+                id: Date.now(),
+                date,
+                startTime,
+                type,
+                duration,
+                calories,
+                intensity,
+                note
+            };
+
+            appData.exercises.unshift(exercise);
+            saveData();
+            updateExercisesList();
+            updateExerciseStats();
+
+            document.getElementById('exerciseForm').reset();
+            document.getElementById('exerciseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('exerciseStartTime').value = new Date().toTimeString().slice(0, 5);
+            document.getElementById('exerciseIntensity').value = '中度';
+            
+            showSuccessMessage('運動記錄已新增！');
+        }
+
+        // 更新列表函數
+        function updateExpensesList() {
+            const container = document.getElementById('expensesList');
+            const countElement = document.getElementById('expenseCount');
+            
+            countElement.textContent = appData.expenses.length;
+            
+            if (appData.expenses.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無支出記錄</p>';
+                return;
+            }
+
+            container.innerHTML = appData.expenses.map(expense => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${expense.date}</div>
+                        <div class="record-details">
+                            <strong>${expense.category}</strong> - ${expense.item}
+                            <span style="color: #ef4444; font-weight: 600; margin-left: 10px;">NT$ ${expense.amount}</span>
+                            ${expense.note ? `<br><small style="color: #6b7280;">${expense.note}</small>` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('expenses', ${expense.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function updateWeightsList() {
+            const container = document.getElementById('weightsList');
+            const countElement = document.getElementById('weightCount');
+            
+            countElement.textContent = appData.weights.length;
+            
+            if (appData.weights.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無體重記錄</p>';
+                return;
+            }
+
+            container.innerHTML = appData.weights.map(weight => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${weight.date} ${weight.time}</div>
+                        <div class="record-details">
+                            <strong>體重:</strong> ${weight.weight} kg
+                            ${weight.waist ? ` | <strong>腰圍:</strong> ${weight.waist} cm` : ''}
+                            ${weight.bmi ? ` | <strong>BMI:</strong> ${weight.bmi}` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('weights', ${weight.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function updateBPList() {
+            const container = document.getElementById('bpList');
+            const countElement = document.getElementById('bpCount');
+            
+            countElement.textContent = appData.bloodPressure.length;
+            
+            if (appData.bloodPressure.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無血壓記錄</p>';
+                return;
+            }
+
+            container.innerHTML = appData.bloodPressure.map(bp => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${bp.date} ${bp.time}</div>
+                        <div class="record-details">
+                            <strong>${bp.systolic}/${bp.diastolic}</strong> mmHg
+                            ${bp.pulse ? ` | <strong>脈搏:</strong> ${bp.pulse} 次/分` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('bloodPressure', ${bp.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function updateExercisesList() {
+            const container = document.getElementById('exercisesList');
+            const countElement = document.getElementById('exerciseCount');
+            
+            countElement.textContent = appData.exercises.length;
+            
+            if (appData.exercises.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無運動記錄</p>';
+                return;
+            }
+
+            container.innerHTML = appData.exercises.map(exercise => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${exercise.date} ${exercise.startTime}</div>
+                        <div class="record-details">
+                            <strong>${exercise.type}</strong> - ${exercise.duration} 分鐘 (${exercise.intensity})
+                            ${exercise.calories ? ` | <span style="color: #ef4444;">${exercise.calories} 卡路里</span>` : ''}
+                            ${exercise.note ? `<br><small style="color: #6b7280;">${exercise.note}</small>` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('exercises', ${exercise.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        // 統計函數
+        function updateWeightStats() {
+            if (appData.weights.length === 0) {
+                document.getElementById('avgWeight').textContent = '--';
+                document.getElementById('latestBMI').textContent = '--';
+                document.getElementById('weightChange').textContent = '--';
+                document.getElementById('weightAdvice').style.display = 'none';
+                return;
+            }
+
+            const avgWeight = (appData.weights.reduce((sum, w) => sum + w.weight, 0) / appData.weights.length).toFixed(1);
+            document.getElementById('avgWeight').textContent = avgWeight + ' kg';
+
+            const latestWithBMI = appData.weights.find(w => w.bmi);
+            if (latestWithBMI) {
+                document.getElementById('latestBMI').textContent = latestWithBMI.bmi;
+                
+                const bmi = latestWithBMI.bmi;
+                let advice = '';
+                if (bmi < 18.5) {
+                    advice = '您的 BMI 偏低，建議增加營養攝取並諮詢醫師。';
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    advice = '您的 BMI 在正常範圍內，請保持健康的生活方式。';
+                } else if (bmi >= 24 && bmi < 27) {
+                    advice = '您的 BMI 稍微偏高，建議適度運動和均衡飲食。';
+                } else {
+                    advice = '您的 BMI 過高，建議諮詢醫師制定減重計畫。';
+                }
+                
+                document.getElementById('weightAdviceContent').textContent = advice;
+                document.getElementById('weightAdvice').style.display = 'block';
+            } else {
+                document.getElementById('latestBMI').textContent = '--';
+                document.getElementById('weightAdvice').style.display = 'none';
+            }
+
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            const thisMonthWeights = appData.weights.filter(w => w.date.startsWith(thisMonth));
+            
+            if (thisMonthWeights.length >= 2) {
+                const latest = thisMonthWeights[0].weight;
+                const earliest = thisMonthWeights[thisMonthWeights.length - 1].weight;
+                const change = (latest - earliest).toFixed(1);
+                const changeText = change > 0 ? `+${change}` : change;
+                document.getElementById('weightChange').textContent = changeText + ' kg';
+            } else {
+                document.getElementById('weightChange').textContent = '--';
+            }
+        }
+
+        function updateBPStats() {
+            if (appData.bloodPressure.length === 0) {
+                document.getElementById('avgSystolic').textContent = '--';
+                document.getElementById('avgDiastolic').textContent = '--';
+                document.getElementById('avgPulse').textContent = '--';
+                document.getElementById('bpAdvice').style.display = 'none';
+                return;
+            }
+
+            const avgSystolic = Math.round(appData.bloodPressure.reduce((sum, bp) => sum + bp.systolic, 0) / appData.bloodPressure.length);
+            const avgDiastolic = Math.round(appData.bloodPressure.reduce((sum, bp) => sum + bp.diastolic, 0) / appData.bloodPressure.length);
+            
+            document.getElementById('avgSystolic').textContent = avgSystolic;
+            document.getElementById('avgDiastolic').textContent = avgDiastolic;
+
+            const pulseBPs = appData.bloodPressure.filter(bp => bp.pulse);
+            if (pulseBPs.length > 0) {
+                const avgPulse = Math.round(pulseBPs.reduce((sum, bp) => sum + bp.pulse, 0) / pulseBPs.length);
+                document.getElementById('avgPulse').textContent = avgPulse;
+            } else {
+                document.getElementById('avgPulse').textContent = '--';
+            }
+
+            let advice = '';
+            if (avgSystolic < 120 && avgDiastolic < 80) {
+                advice = '您的血壓在理想範圍內，請保持健康的生活方式。';
+            } else if (avgSystolic <= 139 && avgDiastolic <= 89) {
+                advice = '您的血壓稍微偏高，建議減少鹽分攝取、多運動，並定期監測。';
+            } else {
+                advice = '您的血壓偏高，建議盡快諮詢醫師，並遵循醫師指示。';
+            }
+            
+            document.getElementById('bpAdviceContent').textContent = advice;
+            document.getElementById('bpAdvice').style.display = 'block';
+        }
+
+        function updateExerciseStats() {
+            if (appData.exercises.length === 0) {
+                document.getElementById('weeklyExercises').textContent = '0';
+                document.getElementById('weeklyDuration').textContent = '0';
+                document.getElementById('weeklyCalories').textContent = '0';
+                document.getElementById('exerciseStreak').textContent = '0';
+                document.getElementById('exerciseAdvice').style.display = 'none';
+                return;
+            }
+
+            const now = new Date();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            
+            const thisWeekExercises = appData.exercises.filter(ex => {
+                const exerciseDate = new Date(ex.date);
+                return exerciseDate >= weekStart;
+            });
+
+            document.getElementById('weeklyExercises').textContent = thisWeekExercises.length;
+
+            const weeklyDuration = thisWeekExercises.reduce((sum, ex) => sum + ex.duration, 0);
+            document.getElementById('weeklyDuration').textContent = weeklyDuration;
+
+            const weeklyCalories = thisWeekExercises.reduce((sum, ex) => sum + (ex.calories || 0), 0);
+            document.getElementById('weeklyCalories').textContent = weeklyCalories;
+
+            const sortedDates = [...new Set(appData.exercises.map(ex => ex.date))].sort().reverse();
+            let streak = 0;
+            
+            for (let i = 0; i < sortedDates.length; i++) {
+                const expectedDate = new Date();
+                expectedDate.setDate(expectedDate.getDate() - i);
+                const expectedDateStr = expectedDate.toISOString().split('T')[0];
+                
+                if (sortedDates[i] === expectedDateStr) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            document.getElementById('exerciseStreak').textContent = streak;
+
+            let advice = '';
+            if (weeklyDuration < 150) {
+                advice = '建議每週至少運動 150 分鐘。試著增加運動頻率，您目前還需要 ' + (150 - weeklyDuration) + ' 分鐘！';
+            } else if (weeklyDuration >= 150 && weeklyDuration < 300) {
+                advice = '很好！您已達到基本運動建議。如果想要更好的健康效果，可以增加到每週 300 分鐘。';
+            } else {
+                advice = '太棒了！您的運動量超過建議標準，請保持這個好習慣，注意適度休息避免過度訓練。';
+            }
+            
+            if (streak >= 7) {
+                advice += ` 連續運動 ${streak} 天真是太厲害了！`;
+            } else if (streak >= 3) {
+                advice += ` 連續 ${streak} 天運動，保持下去！`;
+            }
+            
+            document.getElementById('exerciseAdviceContent').textContent = advice;
+            document.getElementById('exerciseAdvice').style.display = 'block';
+        }
+
+        function updateStats() {
+            document.getElementById('totalExpenses').textContent = appData.expenses.length;
+            document.getElementById('totalWeight').textContent = appData.weights.length;
+            document.getElementById('totalBP').textContent = appData.bloodPressure.length;
+            document.getElementById('totalExercise').textContent = appData.exercises.length;
+            
+            const dataSize = new Blob([JSON.stringify(appData)]).size;
+            const sizeKB = (dataSize / 1024).toFixed(1);
+            document.getElementById('dataSize').textContent = sizeKB + ' KB';
+        }
+
+        // 基本資料相關函數
+        function saveProfile() {
+            const name = document.getElementById('profileName').value;
+            const birthday = document.getElementById('profileBirthday').value;
+            const gender = document.getElementById('profileGender').value;
+            const height = parseFloat(document.getElementById('profileHeight').value);
+            const activity = document.getElementById('profileActivity').value;
+
+            appData.profile = {
+                name,
+                birthday,
+                gender,
+                height,
+                activity
+            };
+
+            saveData();
+            updateProfileDisplay();
+            updateHeightInWeightForm();
+            showSuccessMessage('基本資料已儲存！');
+        }
+
+        function loadProfile() {
+            if (appData.profile) {
+                document.getElementById('profileName').value = appData.profile.name || '';
+                document.getElementById('profileBirthday').value = appData.profile.birthday || '';
+                document.getElementById('profileGender').value = appData.profile.gender || '';
+                document.getElementById('profileHeight').value = appData.profile.height || '';
+                document.getElementById('profileActivity').value = appData.profile.activity || 'light';
+                
+                updateProfileDisplay();
+                updateHeightInWeightForm();
+            }
+        }
+
+        function updateProfileDisplay() {
+            const profile = appData.profile;
+            
+            if (profile.birthday) {
+                const today = new Date();
+                const birthDate = new Date(profile.birthday);
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
+                document.getElementById('displayAge').textContent = finalAge + ' 歲';
+            } else {
+                document.getElementById('displayAge').textContent = '--';
+            }
+
+            if (appData.weights.length > 0 && profile.height) {
+                const latestWeight = appData.weights[0];
+                const bmi = (latestWeight.weight / ((profile.height / 100) ** 2)).toFixed(1);
+                document.getElementById('displayBMI').textContent = bmi;
+            } else {
+                document.getElementById('displayBMI').textContent = '--';
+            }
+
+            if (profile.height) {
+                const heightM = profile.height / 100;
+                const minWeight = (18.5 * heightM * heightM).toFixed(1);
+                const maxWeight = (24 * heightM * heightM).toFixed(1);
+                document.getElementById('displayTargetWeight').textContent = `${minWeight}-${maxWeight} kg`;
+            } else {
+                document.getElementById('displayTargetWeight').textContent = '--';
+            }
+
+            if (profile.height && profile.gender && appData.weights.length > 0) {
+                const weight = appData.weights[0].weight;
+                const age = profile.birthday ? new Date().getFullYear() - new Date(profile.birthday).getFullYear() : 30;
+                
+                let bmr;
+                if (profile.gender === 'male') {
+                    bmr = 10 * weight + 6.25 * profile.height - 5 * age + 5;
+                } else {
+                    bmr = 10 * weight + 6.25 * profile.height - 5 * age - 161;
+                }
+
+                const activityMultipliers = {
+                    'sedentary': 1.2,
+                    'light': 1.375,
+                    'moderate': 1.55,
+                    'active': 1.725,
+                    'very_active': 1.9
+                };
+
+                const tdee = Math.round(bmr * activityMultipliers[profile.activity]);
+                document.getElementById('displayDailyCalories').textContent = tdee + ' 卡';
+            } else {
+                document.getElementById('displayDailyCalories').textContent = '--';
+            }
+
+            if (profile.height && profile.gender && appData.weights.length > 0) {
+                let advice = [];
+                
+                const latestWeight = appData.weights[0].weight;
+                const bmi = latestWeight / ((profile.height / 100) ** 2);
+                
+                if (bmi < 18.5) {
+                    advice.push('您的 BMI 偏低，建議增加營養攝取。');
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    advice.push('您的 BMI 在理想範圍內，請保持目前的健康習慣。');
+                } else if (bmi >= 24 && bmi < 27) {
+                    advice.push('您的 BMI 稍微偏高，建議控制飲食並增加運動。');
+                } else {
+                    advice.push('您的 BMI 過高，建議諮詢營養師制定減重計畫。');
+                }
+
+                const age = profile.birthday ? new Date().getFullYear() - new Date(profile.birthday).getFullYear() : null;
+                if (age) {
+                    if (age >= 65) {
+                        advice.push('建議進行適度的有氧運動和阻力訓練，注意平衡訓練預防跌倒。');
+                    } else if (age >= 40) {
+                        advice.push('建議每週至少 150 分鐘中等強度運動，包含肌力訓練。');
+                    } else {
+                        advice.push('年輕就是本錢！建議養成規律運動習慣，為未來健康打基礎。');
+                    }
+                }
+
+                const weeklyExercises = appData.exercises.filter(ex => {
+                    const exerciseDate = new Date(ex.date);
+                    const weekStart = new Date();
+                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                    return exerciseDate >= weekStart;
+                });
+
+                if (weeklyExercises.length < 3) {
+                    advice.push('建議每週至少運動 3 次，每次 30 分鐘以上。');
+                }
+
+                if (advice.length > 0) {
+                    document.getElementById('profileAdviceContent').innerHTML = advice.join('<br>');
+                    document.getElementById('profileAdvice').style.display = 'block';
+                } else {
+                    document.getElementById('profileAdvice').style.display = 'none';
+                }
+            } else {
+                document.getElementById('profileAdvice').style.display = 'none';
+            }
+        }
+
+        function updateHeightInWeightForm() {
+            const heightInput = document.getElementById('heightValue');
+            if (appData.profile && appData.profile.height) {
+                heightInput.value = appData.profile.height;
+                heightInput.placeholder = appData.profile.height + ' cm (來自基本資料)';
+                heightInput.style.background = '#f8fafc';
+                heightInput.readOnly = true;
+            } else {
+                heightInput.placeholder = '請先設定基本資料';
+                heightInput.style.background = '#f3f4f6';
+                heightInput.readOnly = true;
+            }
+        }
+
+        // 刪除記錄
+        function deleteRecord(type, id) {
+            if (!confirm('確定要刪除這筆記錄嗎？')) return;
+            
+            appData[type] = appData[type].filter(record => record.id !== id);
+            saveData();
+            updateAllDisplays();
+            showSuccessMessage('記錄已刪除！');
+        }
+
+        // 更新所有顯示
+        function updateAllDisplays() {
+            updateExpensesList();
+            updateWeightsList();
+            updateBPList();
+            updateExercisesList();
+            updateWeightStats();
+            updateBPStats();
+            updateExerciseStats();
+            updateStats();
+            updateProfileDisplay();
+        }
+
+        // 匯出數據
+        function exportData(format = 'json') {
+            const timestamp = new Date().toISOString().split('T')[0];
+            
+            if (format === 'json') {
+                const dataStr = JSON.stringify(appData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `daily_tracker_backup_${timestamp}.json`;
+                link.click();
+                
+                showSuccessMessage('JSON 數據匯出完成！');
+            } else if (format === 'csv') {
+                exportCSV(timestamp);
+            }
+        }
+
+        function exportCSV(timestamp) {
+            const csvContent = [];
+            
+            if (appData.profile && (appData.profile.name || appData.profile.birthday)) {
+                csvContent.push('=== 基本資料 ===');
+                csvContent.push('項目,內容');
+                csvContent.push(`姓名,${appData.profile.name || ''}`);
+                csvContent.push(`生日,${appData.profile.birthday || ''}`);
+                csvContent.push(`性別,${appData.profile.gender === 'male' ? '男性' : appData.profile.gender === 'female' ? '女性' : ''}`);
+                csvContent.push(`身高,${appData.profile.height || ''}`);
+                csvContent.push(`活動量,${appData.profile.activity || ''}`);
+                csvContent.push('');
+            }
+
+            if (appData.expenses.length > 0) {
+                csvContent.push('=== 支出記錄 ===');
+                csvContent.push('日期,分類,項目,金額,備註');
+                appData.expenses.forEach(expense => {
+                    csvContent.push(`${expense.date},${expense.category},${expense.item},${expense.amount},"${expense.note || ''}"`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.weights.length > 0) {
+                csvContent.push('=== 體重記錄 ===');
+                csvContent.push('日期,時間,體重(kg),腰圍(cm),身高(cm),BMI');
+                appData.weights.forEach(weight => {
+                    csvContent.push(`${weight.date},${weight.time},${weight.weight},${weight.waist || ''},${weight.height || ''},${weight.bmi || ''}`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.bloodPressure.length > 0) {
+                csvContent.push('=== 血壓記錄 ===');
+                csvContent.push('日期,時間,收縮壓(mmHg),舒張壓(mmHg),脈搏(次/分)');
+                appData.bloodPressure.forEach(bp => {
+                    csvContent.push(`${bp.date},${bp.time},${bp.systolic},${bp.diastolic},${bp.pulse || ''}`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.exercises.length > 0) {
+                csvContent.push('=== 運動記錄 ===');
+                csvContent.push('日期,開始時間,運動類型,時長(分鐘),消耗卡路里,強度,備註');
+                appData.exercises.forEach(exercise => {
+                    csvContent.push(`${exercise.date},${exercise.startTime},${exercise.type},${exercise.duration},${exercise.calories || ''},${exercise.intensity},"${exercise.note || ''}"`);
+                });
+                csvContent.push('');
+            }
+
+            csvContent.push('=== 數據統計 ===');
+            csvContent.push('類型,記錄數量');
+            csvContent.push(`支出記錄,${appData.expenses.length}`);
+            csvContent.push(`體重記錄,${appData.weights.length}`);
+            csvContent.push(`血壓記錄,${appData.bloodPressure.length}`);
+            csvContent.push(`運動記錄,${appData.exercises.length}`);
+            csvContent.push(`匯出日期,${timestamp}`);
+
+            const csvString = csvContent.join('\n');
+            const BOM = '\uFEFF';
+            const dataBlob = new Blob([BOM + csvString], { type: 'text/csv;charset=utf-8' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `daily_tracker_data_${timestamp}.csv`;
+            link.click();
+            
+            showSuccessMessage('CSV 數據匯出完成！');
+        }
+
+        function exportSingleCSV(type) {
+            const timestamp = new Date().toISOString().split('T')[0];
+            let csvContent = [];
+            let filename = '';
+
+            switch(type) {
+                case 'expenses':
+                    csvContent.push('日期,分類,項目,金額,備註');
+                    appData.expenses.forEach(expense => {
+                        csvContent.push(`${expense.date},${expense.category},${expense.item},${expense.amount},"${expense.note || ''}"`);
+                    });
+                    filename = `expenses_${timestamp}.csv`;
+                    break;
+
+                case 'weights':
+                    csvContent.push('日期,時間,體重(kg),腰圍(cm),身高(cm),BMI');
+                    appData.weights.forEach(weight => {
+                        csvContent.push(`${weight.date},${weight.time},${weight.weight},${weight.waist || ''},${weight.height || ''},${weight.bmi || ''}`);
+                    });
+                    filename = `weights_${timestamp}.csv`;
+                    break;
+
+                case 'bloodPressure':
+                    csvContent.push('日期,時間,收縮壓(mmHg),舒張壓(mmHg),脈搏(次/分)');
+                    appData.bloodPressure.forEach(bp => {
+                        csvContent.push(`${bp.date},${bp.time},${bp.systolic},${bp.diastolic},${bp.pulse || ''}`);
+                    });
+                    filename = `blood_pressure_${timestamp}.csv`;
+                    break;
+
+                case 'exercises':
+                    csvContent.push('日期,開始時間,運動類型,時長(分鐘),消耗卡路里,強度,備註');
+                    appData.exercises.forEach(exercise => {
+                        csvContent.push(`${exercise.date},${exercise.startTime},${exercise.type},${exercise.duration},${exercise.calories || ''},${exercise.intensity},"${exercise.note || ''}"`);
+                    });
+                    filename = `exercises_${timestamp}.csv`;
+                    break;
+            }
+
+            if (csvContent.length <= 1) {
+                alert('沒有數據可以匯出');
+                return;
+            }
+
+            const csvString = csvContent.join('\n');
+            const BOM = '\uFEFF';
+            const dataBlob = new Blob([BOM + csvString], { type: 'text/csv;charset=utf-8' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = filename;
+            link.click();
+            
+            showSuccessMessage(`CSV 匯出完成！`);
+        }
+
+        // 匯入數據
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (confirm('匯入數據將覆蓋現有數據，確定要繼續嗎？')) {
+                        appData = importedData;
+                        saveData();
+                        updateAllDisplays();
+                        loadProfile();
+                        showSuccessMessage('數據匯入成功！');
+                    }
+                } catch (error) {
+                    alert('匯入失敗：文件格式不正確');
+                }
+            };
+            reader.readAsText(file);
+            
+            input.value = '';
+        }
+
+        // 清除所有數據
+        function clearAllData() {
+            if (!confirm('確定要清除所有數據嗎？此操作無法復原！')) return;
+            
+            appData = {
+                expenses: [],
+                weights: [],
+                bloodPressure: [],
+                exercises: [],
+                profile: {
+                    name: '',
+                    birthday: '',
+                    gender: '',
+                    height: '',
+                    activity: 'light'
+                }
+            };
+            
+            saveData();
+            updateAllDisplays();
+            loadProfile();
+            showSuccessMessage('所有數據已清除！');
+        }
+
+        // PWA 安裝
+        let deferredPrompt;
+
+        function setupPWAInstall() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installBtn').style.display = 'inline-block';
+            });
+        }
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showSuccessMessage('應用安裝成功！');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBtn').style.display = 'none';
+                });
+            }
+        }
+
+        // 成功訊息提示
+        function showSuccessMessage(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: 500;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Service Worker 註冊 (PWA 離線功能)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="daily-tracker-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{return response||fetch(event.request)}))});')
+                .then(registration => {
+                    console.log('Service Worker 註冊成功');
+                })
+                .catch(error => {
+                    console.log('Service Worker 註冊失敗:', error);
+                });
+        }
+    </script>
 </body>
 </html>
+                <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日常生活記錄</title>
+    <link rel="manifest" href="data:application/json,{%22name%22:%22日常生活記錄%22,%22short_name%22:%22生活記錄%22,%22description%22:%22個人日常記錄管理系統%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #8b5cf6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .records-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .record-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #8b5cf6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-content {
+            flex: 1;
+        }
+
+        .record-date {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .record-details {
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+            background: #f8fafc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .health-advice {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .advice-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav {
+                gap: 5px;
+            }
+            
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📊 日常生活記錄</h1>
+            <p>輕鬆管理您的支出、健康與生活數據</p>
+        </header>
+
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showSection('expenses')">💰 支出記錄</button>
+            <button class="nav-btn" onclick="showSection('weight')">⚖️ 體重記錄</button>
+            <button class="nav-btn" onclick="showSection('blood-pressure')">❤️ 血壓記錄</button>
+            <button class="nav-btn" onclick="showSection('exercise')">🏃 運動記錄</button>
+            <button class="nav-btn" onclick="showSection('charts')">📈 圖表分析</button>
+            <button class="nav-btn" onclick="showSection('profile')">👤 基本資料</button>
+            <button class="nav-btn" onclick="showSection('settings')">⚙️ 設定管理</button>
+        </nav>
+
+        <!-- 支出記錄 -->
+        <section id="expenses" class="section active">
+            <div class="card fade-in">
+                <h2 class="card-title">💰 新增支出記錄</h2>
+                <form id="expenseForm" class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>分類</label>
+                        <select id="expenseCategory" required>
+                            <option value="">請選擇分類</option>
+                            <option value="食物">🍽️ 食物</option>
+                            <option value="交通">🚗 交通</option>
+                            <option value="娛樂">🎬 娛樂</option>
+                            <option value="購物">🛍️ 購物</option>
+                            <option value="醫療">🏥 醫療</option>
+                            <option value="其他">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>項目</label>
+                        <input type="text" id="expenseItem" placeholder="例如：午餐" required>
+                    </div>
+                    <div class="form-group">
+                        <label>金額 (NT$)</label>
+                        <input type="number" id="expenseAmount" placeholder="0" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="expenseNote" placeholder="選填..." rows="2"></textarea>
+                    </div>
+                </form>
+                <button type="submit" class="btn" onclick="addExpense()">新增支出記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 支出記錄</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="expenseCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('expenses')">📊 匯出 CSV</button>
+                </div>
+                <div id="expensesList" class="records-list"></div>
+            </div>
+        </section>
+
+        <!-- 體重記錄 -->
+        <section id="weight" class="section">
+            <div class="card fade-in">
+                <h2 class="card-title">⚖️ 新增體重記錄</h2>
+                <form id="weightForm" class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="weightDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>時間</label>
+                        <input type="time" id="weightTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>體重 (kg)</label>
+                        <input type="number" step="0.1" id="weightValue" placeholder="例如：65.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>腰圍 (cm)</label>
+                        <input type="number" step="0.1" id="waistValue" placeholder="例如：80.5">
+                    </div>
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="text" id="heightValue" placeholder="請先設定基本資料" readonly style="background: #f3f4f6; cursor: pointer;" onclick="showSection('profile'); updateActiveNav('profile');">
+                    </div>
+                </form>
+                <button type="submit" class="btn" onclick="addWeight()">新增體重記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 體重統計</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgWeight">--</div>
+                        <div class="stat-label">平均體重</div
