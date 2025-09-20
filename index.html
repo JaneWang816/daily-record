@@ -239,7 +239,7 @@
         // 載入數據
         function loadData() {
             if (appData.expenses.length === 0) {
-                addSampleData();
+                // addSampleData();
             }
         }
 
@@ -249,7 +249,68 @@
             console.log('數據已保存 (演示模式)');
         }
 
-        
+        // 添加示例數據
+        function addSampleData() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            appData.expenses = [
+                {
+                    id: Date.now() + 1,
+                    date: today.toISOString().split('T')[0],
+                    category: '食物',
+                    item: '午餐',
+                    amount: 150,
+                    note: '便當'
+                },
+                {
+                    id: Date.now() + 2,
+                    date: yesterday.toISOString().split('T')[0],
+                    category: '交通',
+                    item: '捷運',
+                    amount: 30,
+                    note: ''
+                }
+            ];
+
+            appData.weights = [
+                {
+                    id: Date.now() + 3,
+                    date: today.toISOString().split('T')[0],
+                    time: '08:00',
+                    weight: 65.5,
+                    waist: 80,
+                    height: 170,
+                    bmi: 22.7
+                }
+            ];
+
+            appData.bloodPressure = [
+                {
+                    id: Date.now() + 4,
+                    date: today.toISOString().split('T')[0],
+                    time: '09:00',
+                    systolic: 120,
+                    diastolic: 80,
+                    pulse: 72
+                }
+            ];
+
+            appData.exercises = [
+                {
+                    id: Date.now() + 5,
+                    date: today.toISOString().split('T')[0],
+                    startTime: '07:00',
+                    type: '跑步',
+                    duration: 30,
+                    calories: 200,
+                    intensity: '中度',
+                    note: '晨跑'
+                }
+            ];
+        }
+
         // 新增記錄函數
         function addExpense() {
             const date = document.getElementById('expenseDate').value;
