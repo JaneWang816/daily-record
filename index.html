@@ -14,6 +14,14 @@
             }
         };
 
+        // 篩選狀態
+        let filters = {
+            expense: 'all',
+            weight: 'all',
+            bloodPressure: 'all',
+            exercise: 'all'
+        };
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
@@ -33,7 +41,182 @@
             setupPWAInstall();
         });
 
-        // 頁面切換
+        // 日期篩選輔助函數
+        function getDateRange(range) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(range) {
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return { start: weekAgo, end: today };
+                    
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    return { start: monthAgo, end: today };
+                    
+                case 'quarter':
+                    const quarterAgo = new Date(today);
+                    quarterAgo.setMonth(quarterAgo.getMonth() - 3);
+                    return { start: quarterAgo, end: today };
+                    
+                default:
+                    return { start: null, end: null };
+            }
+        }
+
+        function filterRecordsByDate(records, range, customStart = null, customEnd = null) {
+            if (range === 'all') return records;
+            
+            let dateRange;
+            if (range === 'custom' && customStart && customEnd) {
+                dateRange = {
+                    start: new Date(customStart),
+                    end: new Date(customEnd)
+                };
+            } else {
+                dateRange = getDateRange(range);
+            }
+            
+            if (!dateRange.start || !dateRange.end) return records;
+            
+            return records.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate >= dateRange.start && recordDate <= dateRange.end;
+            });
+        }
+
+        // 支出篩選功能
+        function setExpenseFilter(range) {
+            filters.expense = range;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('#expenses .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 顯示/隱藏自訂日期輸入
+            const dateInputs = document.getElementById('expenseDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateExpensesList();
+            }
+        }
+
+        function applyExpenseCustomFilter() {
+            const startDate = document.getElementById('expenseStartDate').value;
+            const endDate = document.getElementById('expenseEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.expenseCustomStart = startDate;
+            filters.expenseCustomEnd = endDate;
+            updateExpensesList();
+        }
+
+        // 體重篩選功能
+        function setWeightFilter(range) {
+            filters.weight = range;
+            
+            document.querySelectorAll('#weight .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const dateInputs = document.getElementById('weightDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateWeightsList();
+            }
+        }
+
+        function applyWeightCustomFilter() {
+            const startDate = document.getElementById('weightStartDate').value;
+            const endDate = document.getElementById('weightEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.weightCustomStart = startDate;
+            filters.weightCustomEnd = endDate;
+            updateWeightsList();
+        }
+
+        // 血壓篩選功能
+        function setBPFilter(range) {
+            filters.bloodPressure = range;
+            
+            document.querySelectorAll('#blood-pressure .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const dateInputs = document.getElementById('bpDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateBPList();
+            }
+        }
+
+        function applyBPCustomFilter() {
+            const startDate = document.getElementById('bpStartDate').value;
+            const endDate = document.getElementById('bpEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.bpCustomStart = startDate;
+            filters.bpCustomEnd = endDate;
+            updateBPList();
+        }
+
+        // 運動篩選功能
+        function setExerciseFilter(range) {
+            filters.exercise = range;
+            
+            document.querySelectorAll('#exercise .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const dateInputs = document.getElementById('exerciseDateInputs');
+            if (range === 'custom') {
+                dateInputs.classList.add('show');
+            } else {
+                dateInputs.classList.remove('show');
+                updateExercisesList();
+            }
+        }
+
+        function applyExerciseCustomFilter() {
+            const startDate = document.getElementById('exerciseStartDate').value;
+            const endDate = document.getElementById('exerciseEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            filters.exerciseCustomStart = startDate;
+            filters.exerciseCustomEnd = endDate;
+            updateExercisesList();
+        }
         function showSection(sectionName) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
@@ -66,68 +249,7 @@
             console.log('數據已保存 (演示模式)');
         }
 
-        // 添加示例數據
-        function addSampleData() {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-
-            appData.expenses = [
-                {
-                    id: Date.now() + 1,
-                    date: today.toISOString().split('T')[0],
-                    category: '食物',
-                    item: '午餐',
-                    amount: 150,
-                    note: '便當'
-                },
-                {
-                    id: Date.now() + 2,
-                    date: yesterday.toISOString().split('T')[0],
-                    category: '交通',
-                    item: '捷運',
-                    amount: 30,
-                    note: ''
-                }
-            ];
-
-            appData.weights = [
-                {
-                    id: Date.now() + 3,
-                    date: today.toISOString().split('T')[0],
-                    time: '08:00',
-                    weight: 65.5,
-                    waist: 80,
-                    height: 170,
-                    bmi: 22.7
-                }
-            ];
-
-            appData.bloodPressure = [
-                {
-                    id: Date.now() + 4,
-                    date: today.toISOString().split('T')[0],
-                    time: '09:00',
-                    systolic: 120,
-                    diastolic: 80,
-                    pulse: 72
-                }
-            ];
-
-            appData.exercises = [
-                {
-                    id: Date.now() + 5,
-                    date: today.toISOString().split('T')[0],
-                    startTime: '07:00',
-                    type: '跑步',
-                    duration: 30,
-                    calories: 200,
-                    intensity: '中度',
-                    note: '晨跑'
-                }
-            ];
-        }
-
+        
         // 新增記錄函數
         function addExpense() {
             const date = document.getElementById('expenseDate').value;
@@ -281,19 +403,27 @@
             showSuccessMessage('運動記錄已新增！');
         }
 
-        // 更新列表函數
+        // 更新列表函數（加入篩選）
         function updateExpensesList() {
             const container = document.getElementById('expensesList');
             const countElement = document.getElementById('expenseCount');
             
-            countElement.textContent = appData.expenses.length;
+            // 套用篩選
+            let filteredExpenses = filterRecordsByDate(
+                appData.expenses, 
+                filters.expense, 
+                filters.expenseCustomStart, 
+                filters.expenseCustomEnd
+            );
             
-            if (appData.expenses.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無支出記錄</p>';
+            countElement.textContent = filteredExpenses.length;
+            
+            if (filteredExpenses.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無支出記錄</p>';
                 return;
             }
 
-            container.innerHTML = appData.expenses.map(expense => `
+            container.innerHTML = filteredExpenses.map(expense => `
                 <div class="record-item">
                     <div class="record-content">
                         <div class="record-date">${expense.date}</div>
@@ -312,14 +442,21 @@
             const container = document.getElementById('weightsList');
             const countElement = document.getElementById('weightCount');
             
-            countElement.textContent = appData.weights.length;
+            let filteredWeights = filterRecordsByDate(
+                appData.weights, 
+                filters.weight, 
+                filters.weightCustomStart, 
+                filters.weightCustomEnd
+            );
             
-            if (appData.weights.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無體重記錄</p>';
+            countElement.textContent = filteredWeights.length;
+            
+            if (filteredWeights.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無體重記錄</p>';
                 return;
             }
 
-            container.innerHTML = appData.weights.map(weight => `
+            container.innerHTML = filteredWeights.map(weight => `
                 <div class="record-item">
                     <div class="record-content">
                         <div class="record-date">${weight.date} ${weight.time}</div>
@@ -338,14 +475,21 @@
             const container = document.getElementById('bpList');
             const countElement = document.getElementById('bpCount');
             
-            countElement.textContent = appData.bloodPressure.length;
+            let filteredBP = filterRecordsByDate(
+                appData.bloodPressure, 
+                filters.bloodPressure, 
+                filters.bpCustomStart, 
+                filters.bpCustomEnd
+            );
             
-            if (appData.bloodPressure.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無血壓記錄</p>';
+            countElement.textContent = filteredBP.length;
+            
+            if (filteredBP.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無血壓記錄</p>';
                 return;
             }
 
-            container.innerHTML = appData.bloodPressure.map(bp => `
+            container.innerHTML = filteredBP.map(bp => `
                 <div class="record-item">
                     <div class="record-content">
                         <div class="record-date">${bp.date} ${bp.time}</div>
@@ -363,14 +507,90 @@
             const container = document.getElementById('exercisesList');
             const countElement = document.getElementById('exerciseCount');
             
-            countElement.textContent = appData.exercises.length;
+            let filteredExercises = filterRecordsByDate(
+                appData.exercises, 
+                filters.exercise, 
+                filters.exerciseCustomStart, 
+                filters.exerciseCustomEnd
+            );
             
-            if (appData.exercises.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無運動記錄</p>';
+            countElement.textContent = filteredExercises.length;
+            
+            if (filteredExercises.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無運動記錄</p>';
                 return;
             }
 
-            container.innerHTML = appData.exercises.map(exercise => `
+            container.innerHTML = filteredExercises.map(exercise => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${exercise.date} ${exercise.startTime}</div>
+                        <div class="record-details">
+                            <strong>${exercise.type}</strong> - ${exercise.duration} 分鐘 (${exercise.intensity})
+                            ${exercise.calories ? ` | <span style="color: #ef4444;">${exercise.calories} 卡路里</span>` : ''}
+                            ${exercise.note ? `<br><small style="color: #6b7280;">${exercise.note}</small>` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('exercises', ${exercise.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+                    <button class="delete-btn" onclick="deleteRecord('weights', ${weight.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function updateBPList() {
+            const container = document.getElementById('bpList');
+            const countElement = document.getElementById('bpCount');
+            
+            let filteredBP = filterRecordsByDate(
+                appData.bloodPressure, 
+                filters.bloodPressure, 
+                filters.bpCustomStart, 
+                filters.bpCustomEnd
+            );
+            
+            countElement.textContent = filteredBP.length;
+            
+            if (filteredBP.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無血壓記錄</p>';
+                return;
+            }
+
+            container.innerHTML = filteredBP.map(bp => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${bp.date} ${bp.time}</div>
+                        <div class="record-details">
+                            <strong>${bp.systolic}/${bp.diastolic}</strong> mmHg
+                            ${bp.pulse ? ` | <strong>脈搏:</strong> ${bp.pulse} 次/分` : ''}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRecord('bloodPressure', ${bp.id})">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function updateExercisesList() {
+            const container = document.getElementById('exercisesList');
+            const countElement = document.getElementById('exerciseCount');
+            
+            let filteredExercises = filterRecordsByDate(
+                appData.exercises, 
+                filters.exercise, 
+                filters.exerciseCustomStart, 
+                filters.exerciseCustomEnd
+            );
+            
+            countElement.textContent = filteredExercises.length;
+            
+            if (filteredExercises.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無運動記錄</p>';
+                return;
+            }
+
+            container.innerHTML = filteredExercises.map(exercise => `
                 <div class="record-item">
                     <div class="record-content">
                         <div class="record-date">${exercise.date} ${exercise.startTime}</div>
@@ -1226,6 +1446,60 @@
             margin-top: 20px;
         }
 
+        .filter-controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .date-inputs {
+            display: none;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-inputs.show {
+            display: flex;
+        }
+
+        .date-inputs input {
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .date-inputs input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -1246,6 +1520,15 @@
             
             .export-buttons {
                 flex-direction: column;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-btn {
+                margin-bottom: 5px;
             }
         }
 
@@ -1311,6 +1594,20 @@
 
             <div class="card">
                 <h3 class="card-title">📋 支出記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setExpenseFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setExpenseFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="expenseDateInputs">
+                        <input type="date" id="expenseStartDate">
+                        <span>至</span>
+                        <input type="date" id="expenseEndDate">
+                        <button class="filter-btn" onclick="applyExpenseCustomFilter()">套用</button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <span style="color: #6b7280;">共 <span id="expenseCount">0</span> 筆記錄</span>
                     <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('expenses')">📊 匯出 CSV</button>
@@ -1368,6 +1665,20 @@
 
             <div class="card">
                 <h3 class="card-title">📋 體重記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setWeightFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setWeightFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setWeightFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setWeightFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setWeightFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="weightDateInputs">
+                        <input type="date" id="weightStartDate">
+                        <span>至</span>
+                        <input type="date" id="weightEndDate">
+                        <button class="filter-btn" onclick="applyWeightCustomFilter()">套用</button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <span style="color: #6b7280;">共 <span id="weightCount">0</span> 筆記錄</span>
                     <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('weights')">📊 匯出 CSV</button>
@@ -1429,6 +1740,20 @@
 
             <div class="card">
                 <h3 class="card-title">📋 血壓記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setBPFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setBPFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setBPFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setBPFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setBPFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="bpDateInputs">
+                        <input type="date" id="bpStartDate">
+                        <span>至</span>
+                        <input type="date" id="bpEndDate">
+                        <button class="filter-btn" onclick="applyBPCustomFilter()">套用</button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <span style="color: #6b7280;">共 <span id="bpCount">0</span> 筆記錄</span>
                     <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('bloodPressure')">📊 匯出 CSV</button>
@@ -1516,6 +1841,20 @@
 
             <div class="card">
                 <h3 class="card-title">📋 運動記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setExerciseFilter('all')">所有記錄</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('custom')">自訂區間</button>
+                    <div class="date-inputs" id="exerciseDateInputs">
+                        <input type="date" id="exerciseStartDate">
+                        <span>至</span>
+                        <input type="date" id="exerciseEndDate">
+                        <button class="filter-btn" onclick="applyExerciseCustomFilter()">套用</button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <span style="color: #6b7280;">共 <span id="exerciseCount">0</span> 筆記錄</span>
                     <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('exercises')">📊 匯出 CSV</button>
