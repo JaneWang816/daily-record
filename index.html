@@ -761,6 +761,7 @@
                     <button class="btn" onclick="exportData('csv')">📊 匯出 CSV</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 匯入數據</button>
                     <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清除所有數據</button>
+                    <button class="btn btn-secondary" onclick="clearTestData()">🔄 重置為範例數據</button>
                 </div>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
                 
@@ -864,15 +865,47 @@
 
         // 載入數據
         function loadData() {
-            if (appData.expenses.length === 0) {
+            try {
+                const savedData = localStorage.getItem('dailyTrackerData');
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    // 確保數據結構完整
+                    appData = {
+                        expenses: parsed.expenses || [],
+                        weights: parsed.weights || [],
+                        bloodPressure: parsed.bloodPressure || [],
+                        exercises: parsed.exercises || [],
+                        profile: {
+                            name: '',
+                            birthday: '',
+                            gender: '',
+                            height: '',
+                            activity: 'light',
+                            ...parsed.profile
+                        }
+                    };
+                    console.log('載入已保存的數據');
+                } else {
+                    // 第一次使用，載入範例數據
+                    addSampleData();
+                    console.log('載入範例數據');
+                }
+            } catch (error) {
+                console.error('載入數據失敗:', error);
                 addSampleData();
             }
         }
 
         // 保存數據
         function saveData() {
-            localStorage.setItem('dailyTrackerData', JSON.stringify(appData));
-            console.log('數據已保存 (演示模式)');
+            try {
+                localStorage.setItem('dailyTrackerData', JSON.stringify(appData));
+                console.log('數據已保存到本機');
+            } catch (error) {
+                console.error('保存數據失敗:', error);
+                // 如果保存失敗，可能是因為儲存空間不足或瀏覽器限制
+                alert('保存數據失敗，請檢查瀏覽器設定或清除部分數據');
+            }
         }
 
         // 添加示例數據
@@ -1903,6 +1936,17 @@
             updateAllDisplays();
             loadProfile();
             showSuccessMessage('所有數據已清除！');
+        }
+
+        function clearTestData() {
+            if (!confirm('確定要清除測試數據並重新載入範例嗎？')) return;
+            
+            try {
+                localStorage.removeItem('dailyTrackerData');
+                location.reload(); // 重新載入頁面以載入新的範例數據
+            } catch (error) {
+                console.error('清除數據失敗:', error);
+            }
         }
 
         // PWA 功能
