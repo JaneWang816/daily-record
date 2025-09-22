@@ -329,6 +329,16 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+
+            #monthlyExpenseOverview .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            
+            #monthlyExpenseOverview h3 {
+                font-size: 1rem !important;
+                margin-bottom: 8px !important;
+            }
         }
 
         @keyframes fadeIn {
@@ -1739,40 +1749,34 @@
 
             // 生成預算vs實際支出的卡片
             const categoryCards = Object.keys(appData.budgets).map(category => {
-                const spent = categoryTotals[category] || 0;
-                const budget = appData.budgets[category] || 0;
-                const percentage = budget > 0 ? Math.round((spent / budget) * 100) : 0;
-        
-                let statusColor = '#10b981'; // 綠色
-                let statusText = '預算內';
-        
-                if (percentage >= 100) {
-                    statusColor = '#ef4444'; // 紅色
-                    statusText = '已超支';
-                } else if (percentage >= 80) {
-                    statusColor = '#f59e0b'; // 橙色
-                    statusText = '接近上限';
-                } else if (percentage >= 60) {
-                    statusColor = '#06d6a0'; // 青綠色
-                    statusText = '正常使用';
-                }
+            const spent = categoryTotals[category] || 0;
+            const budget = appData.budgets[category] || 0;
+            const percentage = budget > 0 ? Math.round((spent / budget) * 100) : 0;
+            
+            let statusColor = '#10b981';
+            let statusText = '正常';
+            
+            if (percentage >= 100) {
+                statusColor = '#ef4444';
+                statusText = '超支';
+            } else if (percentage >= 80) {
+                statusColor = '#f59e0b';
+                statusText = '警示';
+            }
 
-                return `
-                    <div class="stat-card" style="position: relative; overflow: hidden;">
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: ${Math.min(percentage, 100)}%; background: ${statusColor}20; transition: height 0.3s ease;"></div>
-                        <div style="position: relative; z-index: 1;">
-                            <div class="stat-value" style="color: ${statusColor};">NT$ ${spent.toLocaleString()}</div>
-                            <div class="stat-label">${getCategoryIcon(category)} ${category}</div>
-                            <div style="font-size: 0.8rem; margin-top: 5px;">
-                                預算: NT$ ${budget.toLocaleString()}
-                            </div>
-                            <div style="font-size: 0.8rem; color: ${statusColor}; font-weight: 600;">
-                                ${percentage}% • ${statusText}
-                            </div>
-                        </div>
+            return `
+                <div style="background: #f8fafc; border-radius: 8px; padding: 10px; border-left: 4px solid ${statusColor}; position: relative;">
+                    <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 2px;">${getCategoryIcon(category)} ${category}</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: ${statusColor}; margin-bottom: 2px;">
+                        NT$ ${spent.toLocaleString()}
                     </div>
-                `;
-            }).join('');
+                    <div style="font-size: 0.75rem; color: #6b7280;">
+                        ${budget.toLocaleString()} (${percentage}%)
+                    </div>
+                    ${percentage >= 80 ? `<div style="font-size: 0.7rem; color: ${statusColor}; font-weight: 500;">${statusText}</div>` : ''}
+                </div>
+            `;
+        }).join('');
 
             // 總支出卡片
             const totalBudget = Object.values(appData.budgets).reduce((sum, budget) => sum + budget, 0);
@@ -1783,28 +1787,19 @@
             else if (totalPercentage >= 80) totalStatusColor = '#f59e0b';
 
             container.innerHTML = `
-                <div style="margin-bottom: 20px; text-align: center;">
-                    <h3 style="color: #374151; margin-bottom: 10px;">📅 ${new Date().getFullYear()}年${new Date().getMonth() + 1}月支出統計</h3>
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <h3 style="color: #374151; margin-bottom: 10px; font-size: 1.1rem;">📅 ${new Date().getFullYear()}年${new Date().getMonth() + 1}月支出統計</h3>
                 </div>
-        
-                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 20px;">
-                    <div class="stat-card" style="background: linear-gradient(135deg, ${totalStatusColor}, ${totalStatusColor}dd);">
-                        <div class="stat-value">NT$ ${totalThisMonth.toLocaleString()}</div>
-                        <div class="stat-label">本月總支出</div>
-                        <div style="font-size: 0.9rem; margin-top: 8px;">
-                            預算: NT$ ${totalBudget.toLocaleString()} (${totalPercentage}%)
-                        </div>
-                    </div>
+                
+                <!-- 總支出概要 -->
+                <div style="background: linear-gradient(135deg, ${totalStatusColor}, ${totalStatusColor}dd); border-radius: 15px; padding: 15px; margin-bottom: 15px; color: white; text-align: center;">
+                    <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 5px;">NT$ ${totalThisMonth.toLocaleString()}</div>
+                    <div style="opacity: 0.9;">本月總支出 / 預算: NT$ ${totalBudget.toLocaleString()} (${totalPercentage}%)</div>
+                </div>
+                
+                <!-- 分類概覽 - 緊湊格式 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 15px;">
                     ${categoryCards}
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                    <span style="color: #6b7280; font-size: 0.9rem;">
-                        剩餘預算: NT$ ${Math.max(0, totalBudget - totalThisMonth).toLocaleString()}
-                    </span>
-                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="showBudgetSettings()">
-                        ⚙️ 調整預算
-                    </button>
                 </div>
             `;
         }
