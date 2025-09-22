@@ -407,6 +407,192 @@
         .diary-habits { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 8px; }
         .diary-habit-tag { background: #e5e7eb; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; }
         .diary-habit-tag.completed { background: #dcfce7; color: #059669; }
+
+        /* 番茄鐘浮動按鈕樣式 */
+        .pomodoro-float {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .pomodoro-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .pomodoro-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+        }
+
+        .pomodoro-btn.running {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .pomodoro-btn.break {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pomodoro-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 280px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            transform: translateY(10px) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .pomodoro-panel.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .pomodoro-time-display {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .pomodoro-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pomodoro-control-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pomodoro-start {
+            background: #22c55e;
+            color: white;
+        }
+
+        .pomodoro-pause {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .pomodoro-reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        .pomodoro-settings {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .pomodoro-settings input {
+            width: 50px;
+            padding: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .pomodoro-stats {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+
+        /* 專注時間提醒條 */
+        .focus-reminder {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 20px;
+            z-index: 999;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .focus-reminder.show {
+            transform: translateY(0);
+        }
+
+        .focus-reminder button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* 手機適配 */
+        @media (max-width: 768px) {
+            .pomodoro-float {
+                bottom: 20px;
+                right: 15px;
+            }
+            
+            .pomodoro-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .pomodoro-panel {
+                width: 250px;
+                bottom: 60px;
+                right: -20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -815,7 +1001,7 @@
             </div>
         </section>
  
-        html<!-- 簡易日誌 -->
+        <!-- 簡易日誌 -->
         <section id="diary" class="section">
             <div class="card">
                 <h2 class="card-title">📖 今日記錄</h2>
@@ -1148,7 +1334,24 @@
             '教育': 3000,
             '規費': 4000,
             '其他': 2000
+        },
+        pomodoro: {
+            workTime: 25,
+            breakTime: 5,
+            completedToday: 0,
+            totalCompleted: 0,
+            lastDate: null
         }
+    };
+
+    // 番茄鐘狀態
+    let pomodoroState = {
+        isRunning: false,
+        isPaused: false,
+        isBreak: false,
+        timeLeft: 25 * 60, // 秒
+        interval: null,
+        reminderShown: false
     };
 
     // 篩選狀態
@@ -1182,6 +1385,7 @@
             loadProfile();
             loadBudgets();
             setupPWAInstall();
+            initPomodoro();
         });
 
         // 頁面切換
@@ -1238,7 +1442,15 @@
                            '規費': 4000,
                            '其他': 2000,
                            ...parsed.budgets
-                       }
+                       },
+                       pomodoro: {
+                            workTime: 25,
+                            breakTime: 5,
+                            completedToday: 0,
+                            totalCompleted: 0,
+                            lastDate: null,
+                            ...parsed.pomodoro
+                        }
                     };
                     console.log('載入已保存的數據');
                 } else {
@@ -2241,6 +2453,7 @@
                 mood,
                 habits,
                 content,
+                pomodoroCount: appData.pomodoro.completedToday || 0,
                 created: existingIndex >= 0 ? appData.diary[existingIndex].created : new Date().toISOString(),
                 updated: new Date().toISOString()
             };
@@ -3765,6 +3978,229 @@
             showSection('settings');
         }
 
+        // 番茄鐘功能函數
+        function togglePomodoroPanel() {
+            const panel = document.getElementById('pomodoroPanel');
+            panel.classList.toggle('show');
+        }
+
+        function startPomodoro() {
+            if (pomodoroState.isPaused) {
+                // 從暫停狀態恢復
+                pomodoroState.isPaused = false;
+            } else {
+                // 開始新的番茄鐘
+                const workMinutes = parseInt(document.getElementById('workTime').value) || 25;
+                pomodoroState.timeLeft = workMinutes * 60;
+                pomodoroState.isBreak = false;
+            }
+            
+            pomodoroState.isRunning = true;
+            updatePomodoroButton();
+            
+            pomodoroState.interval = setInterval(() => {
+                pomodoroState.timeLeft--;
+                updatePomodoroDisplay();
+                
+                if (pomodoroState.timeLeft <= 0) {
+                    pomodoroComplete();
+                }
+            }, 1000);
+            
+            showFocusReminder();
+            updatePomodoroDisplay();
+        }
+
+        function pausePomodoro() {
+            if (pomodoroState.isRunning) {
+                pomodoroState.isRunning = false;
+                pomodoroState.isPaused = true;
+                clearInterval(pomodoroState.interval);
+                updatePomodoroButton();
+                hideFocusReminder();
+            }
+        }
+
+        function resetPomodoro() {
+            pomodoroState.isRunning = false;
+            pomodoroState.isPaused = false;
+            pomodoroState.isBreak = false;
+            clearInterval(pomodoroState.interval);
+            
+            const workMinutes = parseInt(document.getElementById('workTime').value) || 25;
+            pomodoroState.timeLeft = workMinutes * 60;
+            
+            updatePomodoroDisplay();
+            updatePomodoroButton();
+            hideFocusReminder();
+        }
+
+        function pomodoroComplete() {
+            clearInterval(pomodoroState.interval);
+            pomodoroState.isRunning = false;
+            
+            if (!pomodoroState.isBreak) {
+                // 工作時間結束，開始休息
+                appData.pomodoro.completedToday++;
+                appData.pomodoro.totalCompleted++;
+                appData.pomodoro.lastDate = new Date().toISOString().split('T')[0];
+                
+                const breakMinutes = parseInt(document.getElementById('breakTime').value) || 5;
+                pomodoroState.timeLeft = breakMinutes * 60;
+                pomodoroState.isBreak = true;
+                
+                saveData();
+                updatePomodoroStats();
+                showPomodoroNotification('工作完成！開始休息時間', '你剛完成了一個番茄鐘，現在開始休息吧！');
+                
+                // 自動開始休息計時
+                startPomodoro();
+            } else {
+                // 休息時間結束
+                const workMinutes = parseInt(document.getElementById('workTime').value) || 25;
+                pomodoroState.timeLeft = workMinutes * 60;
+                pomodoroState.isBreak = false;
+                
+                showPomodoroNotification('休息完成！', '準備開始下一個番茄鐘了嗎？');
+                updatePomodoroDisplay();
+                updatePomodoroButton();
+                hideFocusReminder();
+            }
+        }
+
+        function updatePomodoroDisplay() {
+            const minutes = Math.floor(pomodoroState.timeLeft / 60);
+            const seconds = pomodoroState.timeLeft % 60;
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('pomodoroDisplay').textContent = timeString;
+            
+            // 更新提醒條
+            if (pomodoroState.isRunning) {
+                const statusText = pomodoroState.isBreak ? '休息時間' : '專注時間';
+                document.getElementById('focusReminderText').textContent = `${statusText}進行中：還剩 ${timeString}`;
+            }
+        }
+
+        function updatePomodoroButton() {
+            const btn = document.getElementById('pomodoroBtn');
+            
+            if (pomodoroState.isRunning) {
+                const minutes = Math.floor(pomodoroState.timeLeft / 60);
+                btn.textContent = minutes.toString();
+                btn.className = pomodoroState.isBreak ? 'pomodoro-btn break' : 'pomodoro-btn running';
+            } else {
+                btn.textContent = '🍅';
+                btn.className = 'pomodoro-btn';
+            }
+        }
+
+        function showFocusReminder() {
+            if (pomodoroState.isRunning && !pomodoroState.isBreak) {
+                document.getElementById('focusReminder').classList.add('show');
+                pomodoroState.reminderShown = true;
+            }
+        }
+
+        function hideFocusReminder() {
+            document.getElementById('focusReminder').classList.remove('show');
+            pomodoroState.reminderShown = false;
+        }
+
+        function updatePomodoroStats() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 重置每日計數
+            if (appData.pomodoro.lastDate !== today) {
+                appData.pomodoro.completedToday = 0;
+                appData.pomodoro.lastDate = today;
+            }
+            
+            document.getElementById('pomodoroStats').textContent = 
+                `今日完成: ${appData.pomodoro.completedToday} 個番茄`;
+        }
+
+        function showPomodoroNotification(title, message) {
+            // 使用現有的成功訊息系統
+            showSuccessMessage(`${title} ${message}`);
+            
+            // 播放提示音（如果瀏覽器支持）
+            try {
+                const audio = new Audio('data:audio/wav;base64,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');
+                audio.play().catch(() => {}); // 忽略播放失敗的錯誤
+            } catch (e) {}
+        }
+
+        // 初始化番茄鐘
+        function initPomodoro() {
+            // 載入設定
+            if (appData.pomodoro) {
+                document.getElementById('workTime').value = appData.pomodoro.workTime;
+                document.getElementById('breakTime').value = appData.pomodoro.breakTime;
+                
+                // 檢查是否是新的一天，重置每日計數
+                const today = new Date().toISOString().split('T')[0];
+                if (appData.pomodoro.lastDate !== today) {
+                    appData.pomodoro.completedToday = 0;
+                    appData.pomodoro.lastDate = today;
+                    saveData();
+                }
+                
+                updatePomodoroStats();
+            }
+            
+            // 監聽時間設定變更
+            document.getElementById('workTime').addEventListener('change', savePomodoroSettings);
+            document.getElementById('breakTime').addEventListener('change', savePomodoroSettings);
+            
+            // 監聽頁面切換
+            setupNavigationListeners();
+            
+            // 監聽頁面離開
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            
+            // 點擊外部關閉面板
+            document.addEventListener('click', function(e) {
+                const panel = document.getElementById('pomodoroPanel');
+                const btn = document.getElementById('pomodoroBtn');
+                
+                if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                    panel.classList.remove('show');
+                }
+            });
+        }
+
+        function savePomodoroSettings() {
+            appData.pomodoro.workTime = parseInt(document.getElementById('workTime').value) || 25;
+            appData.pomodoro.breakTime = parseInt(document.getElementById('breakTime').value) || 5;
+            saveData();
+            
+            // 如果當前沒有在運行，更新顯示時間
+            if (!pomodoroState.isRunning) {
+                pomodoroState.timeLeft = appData.pomodoro.workTime * 60;
+                updatePomodoroDisplay();
+            }
+        }
+
+        function setupNavigationListeners() {
+            // 監聽導航按鈕點擊
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (pomodoroState.isRunning && !pomodoroState.isBreak && !pomodoroState.reminderShown) {
+                        showFocusReminder();
+                    }
+                });
+            });
+        }
+
+        function handleBeforeUnload(e) {
+            if (pomodoroState.isRunning && !pomodoroState.isBreak) {
+                e.preventDefault();
+                e.returnValue = '專注時間尚未結束，確定要離開嗎？';
+                return '專注時間尚未結束，確定要離開嗎？';
+            }
+        }
+
         // Service Worker 註冊
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="daily-tracker-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{return response||fetch(event.request)}))});')
@@ -3776,5 +4212,34 @@
                 });
         }
     </script>
+    <!-- 浮動番茄鐘 -->
+    <div class="pomodoro-float">
+        <button class="pomodoro-btn" id="pomodoroBtn" onclick="togglePomodoroPanel()">🍅</button>
+        
+        <div class="pomodoro-panel" id="pomodoroPanel">
+            <div class="pomodoro-time-display" id="pomodoroDisplay">25:00</div>
+            
+            <div class="pomodoro-controls">
+                <button class="pomodoro-control-btn pomodoro-start" onclick="startPomodoro()">開始</button>
+                <button class="pomodoro-control-btn pomodoro-pause" onclick="pausePomodoro()">暫停</button>
+                <button class="pomodoro-control-btn pomodoro-reset" onclick="resetPomodoro()">重置</button>
+            </div>
+            
+            <div class="pomodoro-settings">
+                <span>工作: <input type="number" id="workTime" value="25" min="1" max="60"> 分</span>
+                <span>休息: <input type="number" id="breakTime" value="5" min="1" max="30"> 分</span>
+            </div>
+            
+            <div class="pomodoro-stats" id="pomodoroStats">
+                今日完成: 0 個番茄
+            </div>
+        </div>
+    </div>
+
+    <!-- 專注提醒條 -->
+    <div class="focus-reminder" id="focusReminder">
+        <span id="focusReminderText">番茄鐘進行中：還剩 25:00</span>
+        <button onclick="hideFocusReminder()">我知道了</button>
+    </div>
 </body>
 </html>
