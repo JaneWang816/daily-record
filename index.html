@@ -421,6 +421,13 @@
         <!-- 支出記錄 -->
         <section id="expenses" class="section active">
             <div class="card">
+                <h2 class="card-title">📊 本月支出概覽</h2>
+                <div id="monthlyExpenseOverview">
+                    <!-- 本月支出統計將在這裡顯示 -->
+                </div>
+            </div>
+
+            <div class="card">
                 <h2 class="card-title">💰 新增支出記錄</h2>
                 <div class="form-grid">
                     <div class="form-group">
@@ -436,6 +443,8 @@
                             <option value="娛樂">🎬 娛樂</option>
                             <option value="購物">🛍️ 購物</option>
                             <option value="醫療">🏥 醫療</option>
+                            <option value="教育">📚 教育</option>
+                            <option value="規費">💸 規費</option>
                             <option value="其他">📝 其他</option>
                         </select>
                     </div>
@@ -795,7 +804,7 @@
                 <div id="completedTasksList" class="records-list"></div>
             </div>
         </section>
-        第四步：添加簡易日誌HTML結構
+ 
         html<!-- 簡易日誌 -->
         <section id="diary" class="section">
             <div class="card">
@@ -1017,6 +1026,46 @@
         <!-- 設定管理 -->
         <section id="settings" class="section">
             <div class="card">
+                <h2 class="card-title">💰 預算設定</h2>
+                <p style="color: #6b7280; margin-bottom: 15px;">設定每月各類別的預算上限，系統會在支出頁面顯示使用狀況</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>🍽️ 食物預算 (NT$)</label>
+                        <input type="number" id="budgetFood" placeholder="8000">
+                    </div>
+                    <div class="form-group">
+                        <label>🚗 交通預算 (NT$)</label>
+                        <input type="number" id="budgetTransport" placeholder="3000">
+                    </div>
+                    <div class="form-group">
+                        <label>🎬 娛樂預算 (NT$)</label>
+                        <input type="number" id="budgetEntertainment" placeholder="2000">
+                    </div>
+                    <div class="form-group">
+                        <label>🛍️ 購物預算 (NT$)</label>
+                        <input type="number" id="budgetShopping" placeholder="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>🏥 醫療預算 (NT$)</label>
+                        <input type="number" id="budgetMedical" placeholder="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>📚 教育預算 (NT$)</label>
+                        <input type="number" id="budgetEducation" placeholder="3000">
+                    </div>
+                    <div class="form-group">
+                        <label>💸 規費預算 (NT$)</label>
+                        <input type="number" id="budgetUtilities" placeholder="4000">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 其他預算 (NT$)</label>
+                        <input type="number" id="budgetOther" placeholder="2000">
+                    </div>
+                </div>
+                <button class="btn" onclick="saveBudgets()">儲存預算設定</button>
+            </div>
+
+            <div class="card">
                 <h2 class="card-title">⚙️ 資料管理</h2>
                 <div class="export-buttons">
                     <button class="btn" onclick="exportData('json')">📤 匯出 JSON</button>
@@ -1079,6 +1128,16 @@
             gender: '',
             height: '',
             activity: 'light'
+        },
+        budgets: {
+            '食物': 8000,
+            '交通': 3000,
+            '娛樂': 2000,
+            '購物': 5000,
+            '醫療': 1000,
+            '教育': 3000,
+            '規費': 4000,
+            '其他': 2000
         }
     };
 
@@ -1111,6 +1170,7 @@
             updateAllDisplays();
             loadTodayDiary();
             loadProfile();
+            loadBudgets();
             setupPWAInstall();
         });
 
@@ -1157,7 +1217,18 @@
                             height: '',
                             activity: 'light',
                             ...parsed.profile
-                        }
+                        },
+                       budgets: {
+                           '食物': 8000,
+                           '交通': 3000,
+                           '娛樂': 2000,
+                           '購物': 5000,
+                           '醫療': 1000,
+                           '教育': 3000,
+                           '規費': 4000,
+                           '其他': 2000,
+                           ...parsed.budgets
+                       }
                     };
                     console.log('載入已保存的數據');
                 } else {
@@ -1631,6 +1702,111 @@
                     <button class="delete-btn" onclick="deleteRecord('expenses', ${expense.id})">刪除</button>
                 </div>
             `).join('');
+
+            // 更新本月支出概覽
+            updateMonthlyExpenseOverview();
+        }
+
+        // 更新本月支出概覽
+        function updateMonthlyExpenseOverview() {
+            const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+            const thisMonthExpenses = appData.expenses.filter(expense => 
+                expense.date.startsWith(currentMonth)
+            );
+
+            // 按類別統計本月支出
+            const categoryTotals = {};
+            let totalThisMonth = 0;
+
+            thisMonthExpenses.forEach(expense => {
+                if (!categoryTotals[expense.category]) {
+                    categoryTotals[expense.category] = 0;
+                }
+                categoryTotals[expense.category] += expense.amount;
+                totalThisMonth += expense.amount;
+            });
+
+            const container = document.getElementById('monthlyExpenseOverview');
+    
+            if (Object.keys(categoryTotals).length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #6b7280; padding: 20px;">
+                        本月尚無支出記錄
+                    </div>
+                `;
+                return;
+            }
+
+            // 生成預算vs實際支出的卡片
+            const categoryCards = Object.keys(appData.budgets).map(category => {
+                const spent = categoryTotals[category] || 0;
+                const budget = appData.budgets[category] || 0;
+                const percentage = budget > 0 ? Math.round((spent / budget) * 100) : 0;
+        
+                let statusColor = '#10b981'; // 綠色
+                let statusText = '預算內';
+        
+                if (percentage >= 100) {
+                    statusColor = '#ef4444'; // 紅色
+                    statusText = '已超支';
+                } else if (percentage >= 80) {
+                    statusColor = '#f59e0b'; // 橙色
+                    statusText = '接近上限';
+                } else if (percentage >= 60) {
+                    statusColor = '#06d6a0'; // 青綠色
+                    statusText = '正常使用';
+                }
+
+                return `
+                    <div class="stat-card" style="position: relative; overflow: hidden;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: ${Math.min(percentage, 100)}%; background: ${statusColor}20; transition: height 0.3s ease;"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <div class="stat-value" style="color: ${statusColor};">NT$ ${spent.toLocaleString()}</div>
+                            <div class="stat-label">${getCategoryIcon(category)} ${category}</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px;">
+                                預算: NT$ ${budget.toLocaleString()}
+                            </div>
+                            <div style="font-size: 0.8rem; color: ${statusColor}; font-weight: 600;">
+                                ${percentage}% • ${statusText}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 總支出卡片
+            const totalBudget = Object.values(appData.budgets).reduce((sum, budget) => sum + budget, 0);
+            const totalPercentage = totalBudget > 0 ? Math.round((totalThisMonth / totalBudget) * 100) : 0;
+    
+            let totalStatusColor = '#10b981';
+            if (totalPercentage >= 100) totalStatusColor = '#ef4444';
+            else if (totalPercentage >= 80) totalStatusColor = '#f59e0b';
+
+            container.innerHTML = `
+                <div style="margin-bottom: 20px; text-align: center;">
+                    <h3 style="color: #374151; margin-bottom: 10px;">📅 ${new Date().getFullYear()}年${new Date().getMonth() + 1}月支出統計</h3>
+                </div>
+        
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 20px;">
+                    <div class="stat-card" style="background: linear-gradient(135deg, ${totalStatusColor}, ${totalStatusColor}dd);">
+                        <div class="stat-value">NT$ ${totalThisMonth.toLocaleString()}</div>
+                        <div class="stat-label">本月總支出</div>
+                        <div style="font-size: 0.9rem; margin-top: 8px;">
+                            預算: NT$ ${totalBudget.toLocaleString()} (${totalPercentage}%)
+                        </div>
+                    </div>
+                    ${categoryCards}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <span style="color: #6b7280; font-size: 0.9rem;">
+                        剩餘預算: NT$ ${Math.max(0, totalBudget - totalThisMonth).toLocaleString()}
+                    </span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="showBudgetSettings()">
+                        ⚙️ 調整預算
+                    </button>
+                </div>
+            `;
         }
 
         function updateWeightsList() {
@@ -3528,6 +3704,70 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
+        }
+
+        // 獲取分類圖示
+        function getCategoryIcon(category) {
+            const icons = {
+                '食物': '🍽️',
+                '交通': '🚗',
+                '娛樂': '🎬',
+                '購物': '🛍️',
+                '醫療': '🏥',
+                '教育': '📚',
+                '規費': '💸',
+                '其他': '📝'
+            };
+            return icons[category] || '📝';
+        }
+
+        // 預算設定相關函數
+        function saveBudgets() {
+            const budgetMapping = {
+                budgetFood: '食物',
+                budgetTransport: '交通',
+                budgetEntertainment: '娛樂',
+                budgetShopping: '購物',
+                budgetMedical: '醫療',
+                budgetEducation: '教育',
+                budgetUtilities: '規費',
+                budgetOther: '其他'
+            };
+
+            Object.keys(budgetMapping).forEach(inputId => {
+                const value = parseFloat(document.getElementById(inputId).value);
+                if (value && value > 0) {
+                    appData.budgets[budgetMapping[inputId]] = value;
+                }
+            });
+
+            saveData();
+            updateMonthlyExpenseOverview();
+            showSuccessMessage('預算設定已儲存！');
+        }
+
+        function loadBudgets() {
+            const budgetMapping = {
+                budgetFood: '食物',
+                budgetTransport: '交通',
+                budgetEntertainment: '娛樂',
+                budgetShopping: '購物',
+                budgetMedical: '醫療',
+                budgetEducation: '教育',
+                budgetUtilities: '規費',
+                budgetOther: '其他'
+            };
+
+            Object.keys(budgetMapping).forEach(inputId => {
+                const category = budgetMapping[inputId];
+                if (appData.budgets && appData.budgets[category]) {
+                    document.getElementById(inputId).value = appData.budgets[category];
+                }
+            });
+        }
+
+        function showBudgetSettings() {
+            showSection('settings');
         }
 
         // Service Worker 註冊
