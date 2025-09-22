@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <title>日常生活記錄</title>
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#8b5cf6">
@@ -934,30 +935,81 @@
         <!-- 圖表分析 -->
         <section id="charts" class="section">
             <div class="card">
-                <h2 class="card-title">📈 支出分類分析</h2>
-                <div class="chart-container">
-                    <div>支出圓餅圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                <h2 class="card-title">📈 數據圖表分析</h2>
+        
+                <!-- 時間區間選擇 -->
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">分析時間範圍：</span>
+                    <button class="filter-btn active" onclick="setChartFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setChartFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setChartFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setChartFilter('half-year')">近半年</button>
+                    <button class="filter-btn" onclick="setChartFilter('year')">近一年</button>
+                    <button class="filter-btn" onclick="setChartFilter('all')">全部數據</button>
+                </div>
+        
+                <div style="text-align: center; margin: 15px 0; color: #6b7280;">
+                    <span>當前分析範圍：<span id="chartRangeText">近七日</span> | 數據更新時間：<span id="chartUpdateTime">--</span></span>
                 </div>
             </div>
 
             <div class="card">
-                <h2 class="card-title">📉 體重變化趨勢</h2>
+                <h3 class="card-title">💰 支出分類分析</h3>
                 <div class="chart-container">
-                    <div>體重變化線圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                    <canvas id="expenseChart" width="400" height="300"></canvas>
+                </div>
+                <div id="expenseChartStats" style="margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                    <!-- 支出統計數據將在此顯示 -->
                 </div>
             </div>
 
             <div class="card">
-                <h2 class="card-title">💓 血壓監控圖表</h2>
+                <h3 class="card-title">⚖️ 體重變化趨勢</h3>
                 <div class="chart-container">
-                    <div>血壓趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                    <canvas id="weightChart" width="400" height="300"></canvas>
+                </div>
+                <div id="weightChartStats" style="margin-top: 15px;">
+                    <!-- 體重統計將在此顯示 -->
                 </div>
             </div>
 
             <div class="card">
-                <h2 class="card-title">🏃 運動統計圖表</h2>
+                <h3 class="card-title">❤️ 血壓監控圖表</h3>
                 <div class="chart-container">
-                    <div>運動時間和卡路里趨勢圖將在此顯示<br>（需要更多數據來生成圖表）</div>
+                    <canvas id="bpChart" width="400" height="300"></canvas>
+                </div>
+                <div id="bpChartStats" style="margin-top: 15px;">
+                    <!-- 血壓統計將在此顯示 -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">🏃 運動統計圖表</h3>
+                <div class="chart-container">
+                    <canvas id="exerciseChart" width="400" height="300"></canvas>
+                </div>
+                <div id="exerciseChartStats" style="margin-top: 15px;">
+                    <!-- 運動統計將在此顯示 -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📋 任務完成率統計</h3>
+                <div class="chart-container">
+                    <canvas id="taskChart" width="400" height="300"></canvas>
+                </div>
+                <div id="taskChartStats" style="margin-top: 15px;">
+                    <!-- 任務統計將在此顯示 -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📖 習慣養成分析</h3>
+                <div class="chart-container">
+                    <canvas id="habitChart" width="400" height="300"></canvas>
+                </div>
+                <div id="habitChartStats" style="margin-top: 15px;">
+                    <!-- 習慣統計將在此顯示 -->
                 </div>
             </div>
         </section>
@@ -2442,6 +2494,7 @@
             updateHabitsStats();
             updateStats();
             updateProfileDisplay();
+            updateAllCharts();
         }
 
         // 匯出功能
@@ -2727,6 +2780,10 @@
             });
         }
 
+        setTimeout(() => {
+            updateAllCharts();
+        }, 500);
+
         function installPWA() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -2772,6 +2829,705 @@
                     }
                 }, 300);
             }, 3000);
+        }
+
+        // 圖表相關變數
+        let chartFilter = 'week';
+        let charts = {};
+
+        // 圖表時間區間設定
+        function setChartFilter(range) {
+            chartFilter = range;
+    
+            // 更新按鈕狀態
+            document.querySelectorAll('#charts .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+    
+            // 更新顯示文字
+            const rangeTexts = {
+                'week': '近七日',
+                'month': '近一個月', 
+                'quarter': '近三個月',
+                'half-year': '近半年',
+                'year': '近一年',
+                'all': '全部數據'
+            };
+    
+            document.getElementById('chartRangeText').textContent = rangeTexts[range];
+            document.getElementById('chartUpdateTime').textContent = new Date().toLocaleString();
+    
+            // 重新渲染所有圖表
+            updateAllCharts();
+        }
+
+        // 獲取圖表數據的時間範圍
+        function getChartDateRange(range) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+            switch(range) {
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return { start: weekAgo, end: today };
+            
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    return { start: monthAgo, end: today };
+            
+                case 'quarter':
+                    const quarterAgo = new Date(today);
+                    quarterAgo.setMonth(quarterAgo.getMonth() - 3);
+                    return { start: quarterAgo, end: today };
+            
+                case 'half-year':
+                    const halfYearAgo = new Date(today);
+                    halfYearAgo.setMonth(halfYearAgo.getMonth() - 6);
+                    return { start: halfYearAgo, end: today };
+            
+                case 'year':
+                    const yearAgo = new Date(today);
+                    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+                    return { start: yearAgo, end: today };
+            
+                default: // 'all'
+                    return { start: null, end: null };
+            }
+        }
+
+        // 根據時間範圍過濾數據
+        function filterDataByChartRange(records, range) {
+            if (range === 'all') return records;
+    
+            const dateRange = getChartDateRange(range);
+            if (!dateRange.start || !dateRange.end) return records;
+    
+            return records.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate >= dateRange.start && recordDate <= dateRange.end;
+            });
+        }
+
+        // 更新所有圖表
+        function updateAllCharts() {
+            updateExpenseChart();
+            updateWeightChart();
+            updateBPChart();
+            updateExerciseChart();
+            updateTaskChart();
+            updateHabitChart();
+        }
+
+        // 支出分類圓餅圖
+        function updateExpenseChart() {
+            const filteredExpenses = filterDataByChartRange(appData.expenses, chartFilter);
+    
+            if (filteredExpenses.length === 0) {
+                showEmptyChart('expenseChart', '此時間範圍內無支出數據');
+                document.getElementById('expenseChartStats').innerHTML = '';
+                return;
+            }
+
+            // 按分類統計支出
+            const categoryData = {};
+            let totalAmount = 0;
+    
+            filteredExpenses.forEach(expense => {
+                if (!categoryData[expense.category]) {
+                    categoryData[expense.category] = 0;
+                }
+                categoryData[expense.category] += expense.amount;
+                totalAmount += expense.amount;
+            });
+
+            const labels = Object.keys(categoryData);
+            const amounts = Object.values(categoryData);
+            const colors = ['#8b5cf6', '#06d6a0', '#f72585', '#4cc9f0', '#f77f00', '#fcbf49'];
+
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+    
+            if (charts.expense) {
+                charts.expense.destroy();
+            }
+    
+            charts.expense = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: amounts,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 顯示統計數據
+            const statsHTML = labels.map((label, index) => {
+                const percentage = ((amounts[index] / totalAmount) * 100).toFixed(1);
+                return `
+                    <div style="text-align: center; padding: 10px; background: ${colors[index]}20; border-radius: 8px;">
+                        <div style="font-weight: 600; color: ${colors[index]};">${label}</div>
+                        <div style="font-size: 0.9rem;">NT$ ${amounts[index]}</div>
+                        <div style="font-size: 0.8rem; color: #6b7280;">${percentage}%</div>
+                    </div>
+                `;
+            }).join('');
+    
+            document.getElementById('expenseChartStats').innerHTML = statsHTML;
+        }
+
+        // 體重變化趨勢線圖
+        function updateWeightChart() {
+            const filteredWeights = filterDataByChartRange(appData.weights, chartFilter);
+    
+            if (filteredWeights.length === 0) {
+                showEmptyChart('weightChart', '此時間範圍內無體重數據');
+                document.getElementById('weightChartStats').innerHTML = '';
+                return;
+            }
+
+            // 按日期排序
+            const sortedWeights = filteredWeights.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+            const labels = sortedWeights.map(w => w.date);
+            const weights = sortedWeights.map(w => w.weight);
+            const bmis = sortedWeights.map(w => w.bmi).filter(bmi => bmi);
+
+            const ctx = document.getElementById('weightChart').getContext('2d');
+    
+            if (charts.weight) {
+                charts.weight.destroy();
+            }
+    
+            charts.weight = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '體重 (kg)',
+                        data: weights,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: '#8b5cf620',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '體重 (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 顯示統計
+            const avgWeight = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
+            const weightChange = weights.length > 1 ? (weights[weights.length - 1] - weights[0]).toFixed(1) : '0';
+            const avgBMI = bmis.length > 0 ? (bmis.reduce((a, b) => a + b, 0) / bmis.length).toFixed(1) : '--';
+    
+            document.getElementById('weightChartStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${avgWeight} kg</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">平均體重</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: ${weightChange > 0 ? '#ef4444' : '#10b981'};">${weightChange > 0 ? '+' : ''}${weightChange} kg</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">期間變化</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${avgBMI}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">平均 BMI</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 血壓監控圖表（早晚分別顯示）
+        function updateBPChart() {
+            const filteredBP = filterDataByChartRange(appData.bloodPressure, chartFilter);
+    
+            if (filteredBP.length === 0) {
+                showEmptyChart('bpChart', '此時間範圍內無血壓數據');
+                document.getElementById('bpChartStats').innerHTML = '';
+                return;
+            }
+
+            // 按日期排序
+            const sortedBP = filteredBP.sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+    
+            // 分早上（06:00-12:00）和晚上（18:00-23:59）
+            const morningBP = sortedBP.filter(bp => {
+                const hour = parseInt(bp.time.split(':')[0]);
+                return hour >= 6 && hour < 12;
+            });
+    
+            const eveningBP = sortedBP.filter(bp => {
+                const hour = parseInt(bp.time.split(':')[0]);
+                return hour >= 18 && hour < 24;
+            });
+
+            // 準備圖表數據
+            const allDates = [...new Set(sortedBP.map(bp => bp.date))].sort();
+    
+            const morningSystolic = allDates.map(date => {
+                const dayData = morningBP.find(bp => bp.date === date);
+                return dayData ? dayData.systolic : null;
+            });
+    
+            const morningDiastolic = allDates.map(date => {
+                const dayData = morningBP.find(bp => bp.date === date);
+                return dayData ? dayData.diastolic : null;
+            });
+    
+            const eveningSystolic = allDates.map(date => {
+                const dayData = eveningBP.find(bp => bp.date === date);
+                return dayData ? dayData.systolic : null;
+            });
+    
+            const eveningDiastolic = allDates.map(date => {
+                const dayData = eveningBP.find(bp => bp.date === date);
+                return dayData ? dayData.diastolic : null;
+            });
+
+            const ctx = document.getElementById('bpChart').getContext('2d');
+    
+            if (charts.bp) {
+                charts.bp.destroy();
+            }
+    
+            charts.bp = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allDates,
+                    datasets: [
+                        {
+                            label: '早上收縮壓',
+                            data: morningSystolic,
+                            borderColor: '#ef4444',
+                            backgroundColor: '#ef444420',
+                            borderWidth: 2,
+                            borderDash: [],
+                            tension: 0.4
+                        },
+                        {
+                            label: '早上舒張壓', 
+                            data: morningDiastolic,
+                            borderColor: '#f97316',
+                            backgroundColor: '#f9731620',
+                            borderWidth: 2,
+                            borderDash: [],
+                            tension: 0.4
+                        },
+                        {
+                            label: '晚上收縮壓',
+                            data: eveningSystolic,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: '#8b5cf620',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        },
+                        {
+                            label: '晚上舒張壓',
+                            data: eveningDiastolic,
+                            borderColor: '#06d6a0',
+                            backgroundColor: '#06d6a020',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '血壓 (mmHg)'
+                            },
+                            min: 40,
+                            max: 180
+                        }
+                    }
+                }
+            });
+
+            // 計算統計數據
+            const allSystolic = sortedBP.map(bp => bp.systolic);
+            const allDiastolic = sortedBP.map(bp => bp.diastolic);
+            const avgSystolic = Math.round(allSystolic.reduce((a, b) => a + b, 0) / allSystolic.length);
+            const avgDiastolic = Math.round(allDiastolic.reduce((a, b) => a + b, 0) / allDiastolic.length);
+    
+            const morningAvgSys = morningBP.length > 0 ? Math.round(morningBP.reduce((sum, bp) => sum + bp.systolic, 0) / morningBP.length) : '--';
+            const eveningAvgSys = eveningBP.length > 0 ? Math.round(eveningBP.reduce((sum, bp) => sum + bp.systolic, 0) / eveningBP.length) : '--';
+    
+            document.getElementById('bpChartStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${avgSystolic}/${avgDiastolic}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">整體平均</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #fef2f2; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #ef4444;">${morningAvgSys}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">早上平均收縮壓</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f0f9ff; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${eveningAvgSys}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">晚上平均收縮壓</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f0fdf4; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #10b981;">${sortedBP.length}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">測量次數</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 運動統計圖表
+        function updateExerciseChart() {
+            const filteredExercises = filterDataByChartRange(appData.exercises, chartFilter);
+    
+            if (filteredExercises.length === 0) {
+                showEmptyChart('exerciseChart', '此時間範圍內無運動數據');
+                document.getElementById('exerciseChartStats').innerHTML = '';
+                return;
+            }
+
+            // 按運動類型統計時長
+            const typeData = {};
+            let totalDuration = 0;
+            let totalCalories = 0;
+    
+            filteredExercises.forEach(exercise => {
+                if (!typeData[exercise.type]) {
+                    typeData[exercise.type] = { duration: 0, calories: 0, count: 0 };
+                }
+                typeData[exercise.type].duration += exercise.duration;
+                typeData[exercise.type].calories += exercise.calories || 0;
+                typeData[exercise.type].count += 1;
+                totalDuration += exercise.duration;
+                totalCalories += exercise.calories || 0;
+            });
+
+            const labels = Object.keys(typeData);
+            const durations = Object.values(typeData).map(data => data.duration);
+            const colors = ['#8b5cf6', '#06d6a0', '#f72585', '#4cc9f0', '#f77f00', '#fcbf49', '#c77dff', '#7209b7'];
+
+            const ctx = document.getElementById('exerciseChart').getContext('2d');
+    
+            if (charts.exercise) {
+                charts.exercise.destroy();
+            }
+    
+            charts.exercise = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '運動時長 (分鐘)',
+                        data: durations,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderColor: colors.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '時長 (分鐘)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('exerciseChartStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${totalDuration}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">總運動時長 (分)</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #f77f00;">${totalCalories}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">總消耗卡路里</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #06d6a0;">${filteredExercises.length}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">運動次數</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #f72585;">${Math.round(totalDuration / filteredExercises.length)}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">平均時長 (分)</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 任務完成率統計
+        function updateTaskChart() {
+            const dateRange = getChartDateRange(chartFilter);
+            let filteredCompletedTasks;
+    
+            if (chartFilter === 'all') {
+                filteredCompletedTasks = appData.completedTasks;
+            } else {
+                filteredCompletedTasks = appData.completedTasks.filter(task => {
+                    const taskDate = new Date(task.completedDate);
+                    return taskDate >= dateRange.start && taskDate <= dateRange.end;
+                });
+            }
+    
+            if (filteredCompletedTasks.length === 0) {
+                showEmptyChart('taskChart', '此時間範圍內無完成任務數據');
+                document.getElementById('taskChartStats').innerHTML = '';
+                return;
+            }
+
+            // 按優先級統計
+            const priorityData = { high: 0, medium: 0, low: 0 };
+            filteredCompletedTasks.forEach(task => {
+                priorityData[task.priority]++;
+            });
+
+            const labels = ['高優先級', '中優先級', '低優先級'];
+            const counts = [priorityData.high, priorityData.medium, priorityData.low];
+            const colors = ['#ef4444', '#f59e0b', '#10b981'];
+
+            const ctx = document.getElementById('taskChart').getContext('2d');
+    
+            if (charts.task) {
+                charts.task.destroy();
+            }
+    
+            charts.task = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 計算完成率（假設未完成任務也在時間範圍內）
+            const totalTasks = appData.tasks.length + filteredCompletedTasks.length;
+            const completionRate = totalTasks > 0 ? Math.round((filteredCompletedTasks.length / totalTasks) * 100) : 0;
+    
+            document.getElementById('taskChartStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f0fdf4; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #10b981;">${filteredCompletedTasks.length}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">已完成任務</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #fef2f2; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #ef4444;">${priorityData.high}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">高優先級完成</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f0f9ff; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #0ea5e9;">${completionRate}%</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">完成率</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 習慣養成分析
+        function updateHabitChart() {
+            if (appData.habits.length === 0) {
+                showEmptyChart('habitChart', '尚未建立習慣項目');
+                document.getElementById('habitChartStats').innerHTML = '';
+                return;
+            }
+
+            const dateRange = getChartDateRange(chartFilter);
+            let dateList = [];
+    
+            if (chartFilter === 'all') {
+                // 取所有日誌記錄的日期
+                dateList = [...new Set(appData.diary.map(d => d.date))].sort();
+            } else {
+                // 生成日期範圍內的所有日期
+                const start = dateRange.start;
+                const end = dateRange.end;
+                const current = new Date(start);
+        
+                while (current <= end) {
+                    dateList.push(current.toISOString().split('T')[0]);
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+
+            // 計算每個習慣的完成率
+            const habitData = appData.habits.map(habit => {
+                let completedDays = 0;
+                let totalDays = 0;
+        
+                dateList.forEach(date => {
+                    const diary = appData.diary.find(d => d.date === date);
+                    if (diary) {
+                        totalDays++;
+                        if (diary.habits && diary.habits[habit.id]) {
+                            completedDays++;
+                        }
+                    }
+                });
+        
+                return {
+                    name: habit.name,
+                    rate: totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0,
+                    completed: completedDays,
+                    total: totalDays
+                };
+            });
+
+            const labels = habitData.map(h => h.name);
+            const rates = habitData.map(h => h.rate);
+            const colors = ['#8b5cf6', '#06d6a0', '#f72585', '#4cc9f0', '#f77f00', '#fcbf49', '#c77dff', '#7209b7'];
+
+            const ctx = document.getElementById('habitChart').getContext('2d');
+    
+            if (charts.habit) {
+                charts.habit.destroy();
+            }
+    
+            charts.habit = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '完成率 (%)',
+                        data: rates,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: '#8b5cf620',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#8b5cf6',
+                        pointBorderColor: '#fff',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+
+            const avgRate = habitData.length > 0 ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
+            const bestHabit = habitData.reduce((best, current) => current.rate > best.rate ? current : best, habitData[0]);
+    
+            document.getElementById('habitChartStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #8b5cf6;">${avgRate}%</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">平均完成率</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f0fdf4; border-radius: 10px;">
+                        <div style="font-size: 1rem; font-weight: 600; color: #10b981;">${bestHabit ? bestHabit.name : '--'}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">表現最佳習慣</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #fef2f2; border-radius: 10px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #ef4444;">${bestHabit ? bestHabit.rate : 0}%</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">最高完成率</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 空圖表顯示函數
+        function showEmptyChart(canvasId, message) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+    
+            if (charts[canvasId.replace('Chart', '')]) {
+                charts[canvasId.replace('Chart', '')].destroy();
+            }
+    
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
         }
 
         // Service Worker 註冊
