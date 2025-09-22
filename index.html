@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>日常生活記錄</title>
-    <link rel="manifest" href="data:application/json,{%22name%22:%22日常生活記錄%22,%22short_name%22:%22生活記錄%22,%22description%22:%22個人日常記錄管理系統%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%238b5cf6'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3E記%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="生活記錄">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='35' fill='url(%23bg)'/%3E%3Ccircle cx='90' cy='70' r='25' fill='white' opacity='0.2'/%3E%3Ctext x='90' y='80' text-anchor='middle' fill='white' font-size='40' font-family='system-ui, sans-serif' font-weight='600'%3E記%3C/text%3E%3Crect x='50' y='110' width='80' height='4' rx='2' fill='white' opacity='0.7'/%3E%3Crect x='60' y='125' width='60' height='3' rx='1.5' fill='white' opacity='0.5'/%3E%3Crect x='70' y='138' width='40' height='3' rx='1.5' fill='white' opacity='0.3'/%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22日常生活記錄%22,%22short_name%22:%22生活記錄%22,%22description%22:%22個人日常記錄管理系統%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%238b5cf6%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='192' height='192' rx='35' fill='url(%23bg)'/%3E%3Ccircle cx='96' cy='75' r='28' fill='white' opacity='0.2'/%3E%3Ctext x='96' y='85' text-anchor='middle' fill='white' font-size='45' font-family='system-ui, sans-serif' font-weight='600'%3E記%3C/text%3E%3Crect x='50' y='120' width='92' height='5' rx='2.5' fill='white' opacity='0.7'/%3E%3Crect x='60' y='135' width='72' height='4' rx='2' fill='white' opacity='0.5'/%3E%3Crect x='70' y='148' width='52' height='4' rx='2' fill='white' opacity='0.3'/%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22},{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='85' fill='url(%23bg)'/%3E%3Ccircle cx='256' cy='190' r='70' fill='white' opacity='0.2'/%3E%3Ctext x='256' y='215' text-anchor='middle' fill='white' font-size='110' font-family='system-ui, sans-serif' font-weight='600'%3E記%3C/text%3E%3Crect x='130' y='300' width='252' height='12' rx='6' fill='white' opacity='0.7'/%3E%3Crect x='150' y='330' width='212' height='10' rx='5' fill='white' opacity='0.5'/%3E%3Crect x='170' y='358' width='172' height='10' rx='5' fill='white' opacity='0.3'/%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
     <style>
         * {
             margin: 0;
@@ -328,6 +334,68 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* 任務相關樣式 */
+        .task-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid #8b5cf6;
+            transition: all 0.3s ease;
+        }
+
+        .task-item.overdue { border-left-color: #ef4444; background: #fef2f2; }
+        .task-item.today { border-left-color: #f59e0b; background: #fffbeb; }
+        .task-item.upcoming { border-left-color: #10b981; background: #f0fdf4; }
+
+        .task-checkbox { width: 20px; height: 20px; cursor: pointer; }
+        .task-content { flex: 1; }
+        .task-name { font-weight: 600; margin-bottom: 5px; }
+        .task-date { font-size: 0.9rem; color: #6b7280; }
+
+        .task-priority { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .task-priority.high { background: #fef2f2; color: #dc2626; }
+        .task-priority.medium { background: #fffbeb; color: #d97706; }
+        .task-priority.low { background: #f0fdf4; color: #059669; }
+
+        /* 習慣相關樣式 */
+        .habit-item {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .habit-item.checked { background: #f0fdf4; border-color: #10b981; }
+        .habit-checkbox { width: 18px; height: 18px; cursor: pointer; }
+        .habit-name { flex: 1; font-weight: 500; }
+        .habit-streak { font-size: 0.8rem; color: #6b7280; background: #f3f4f6; padding: 2px 8px; border-radius: 12px; }
+
+        /* 日誌相關樣式 */
+        .diary-entry { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #8b5cf6; }
+        .diary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .diary-date { font-weight: 600; color: #374151; }
+        .diary-mood { padding: 4px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: 500; }
+
+        .mood-5 { background: #f0fdf4; color: #059669; }
+        .mood-4 { background: #f0f9ff; color: #0284c7; }
+        .mood-3 { background: #f9fafb; color: #6b7280; }
+        .mood-2 { background: #fffbeb; color: #d97706; }
+        .mood-1 { background: #fef2f2; color: #dc2626; }
+
+        .diary-content { margin: 10px 0; line-height: 1.6; }
+        .diary-stats { display: flex; gap: 15px; font-size: 0.9rem; color: #6b7280; margin-top: 10px; }
+        .diary-habits { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .diary-habit-tag { background: #e5e7eb; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; }
+        .diary-habit-tag.completed { background: #dcfce7; color: #059669; }
     </style>
 </head>
 <body>
@@ -342,6 +410,8 @@
             <button class="nav-btn" onclick="showSection('weight')">⚖️ 體重記錄</button>
             <button class="nav-btn" onclick="showSection('blood-pressure')">❤️ 血壓記錄</button>
             <button class="nav-btn" onclick="showSection('exercise')">🏃 運動記錄</button>
+            <button class="nav-btn" onclick="showSection('tasks')">📋 例行任務</button>
+            <button class="nav-btn" onclick="showSection('diary')">📖 簡易日誌</button>
             <button class="nav-btn" onclick="showSection('charts')">📈 圖表分析</button>
             <button class="nav-btn" onclick="showSection('profile')">👤 基本資料</button>
             <button class="nav-btn" onclick="showSection('settings')">⚙️ 設定管理</button>
@@ -655,6 +725,146 @@
             </div>
         </section>
 
+        <!-- 例行任務 -->
+        <section id="tasks" class="section">
+            <div class="card">
+                <h2 class="card-title">📋 新增例行任務</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>任務名稱</label>
+                        <input type="text" id="taskName" placeholder="例如：繳電費" required>
+                    </div>        
+                    <div class="form-group">
+                        <label>下次到期日</label>
+                        <input type="date" id="taskNextDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>重複間隔</label>
+                        <select id="taskInterval" required>
+                            <option value="">請選擇重複間隔</option>
+                            <option value="weekly">每週</option>
+                            <option value="biweekly">每雙週</option>
+                            <option value="monthly">每月</option>
+                            <option value="quarterly">每季</option>
+                            <option value="semiannual">每半年</option>
+                            <option value="annual">每年</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>優先級</label>
+                        <select id="taskPriority">
+                            <option value="low">🟢 低</option>
+                            <option value="medium" selected>🟡 中</option>
+                            <option value="high">🔴 高</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>備註</label>
+                        <textarea id="taskNote" placeholder="任務說明、提醒事項等..." rows="2"></textarea>
+                    </div>
+                </div>
+                <button class="btn" onclick="addTask()">新增例行任務</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📅 待辦任務列表</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="taskCount">0</span> 項任務</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="showCompletedTasks()">📋 已完成記錄</button>
+                        <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('tasks')">📊 匯出 CSV</button>
+                    </div>
+                </div>
+                <div id="tasksList" class="records-list"></div>
+            </div>
+
+            <div class="card" id="completedTasksCard" style="display: none;">
+                <h3 class="card-title">✅ 已完成任務記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setCompletedTaskFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setCompletedTaskFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setCompletedTaskFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setCompletedTaskFilter('all')">所有記錄</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="completedTaskCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="hideCompletedTasks()">隱藏</button>
+                </div>
+                <div id="completedTasksList" class="records-list"></div>
+            </div>
+        </section>
+        第四步：添加簡易日誌HTML結構
+        html<!-- 簡易日誌 -->
+        <section id="diary" class="section">
+            <div class="card">
+                <h2 class="card-title">📖 今日記錄</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-weight: 500;">日期:</label>
+                        <input type="date" id="diaryDate" style="padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    </div>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="loadDiaryForDate()">載入該日記錄</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>今日步數</label>
+                        <input type="number" id="diarySteps" placeholder="例如：8000">
+                    </div>
+                    <div class="form-group">
+                        <label>心情評分</label>
+                        <select id="diaryMood">
+                            <option value="">請選擇</option>
+                            <option value="5">😄 非常好</option>
+                            <option value="4">😊 很好</option>
+                            <option value="3">😐 普通</option>
+                            <option value="2">😔 不太好</option>
+                            <option value="1">😞 很糟</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>習慣打卡</label>
+                    <div id="habitsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                        <!-- 習慣項目將在這裡動態生成 -->
+                    </div>
+                    <button class="btn btn-secondary" style="margin-top: 10px; padding: 8px 16px; font-size: 14px;" onclick="addHabit()">+ 新增習慣</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>今日小記</label>
+                    <textarea id="diaryContent" placeholder="記錄今天發生的事情、感想、收穫..." rows="5"></textarea>
+                </div>
+
+                <button class="btn" onclick="saveDiary()">儲存今日記錄</button>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 習慣統計</h3>
+                <div id="habitsStats" class="stats-grid">
+                    <!-- 習慣統計將在這裡顯示 -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📝 日誌記錄</h3>
+                <div class="filter-controls">
+                    <span style="font-weight: 500; color: #555;">篩選範圍：</span>
+                    <button class="filter-btn active" onclick="setDiaryFilter('week')">近七日</button>
+                    <button class="filter-btn" onclick="setDiaryFilter('month')">近一個月</button>
+                    <button class="filter-btn" onclick="setDiaryFilter('quarter')">近三個月</button>
+                    <button class="filter-btn" onclick="setDiaryFilter('all')">所有記錄</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #6b7280;">共 <span id="diaryCount">0</span> 筆記錄</span>
+                    <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;" onclick="exportSingleCSV('diary')">📊 匯出 CSV</button>
+                </div>
+                <div id="diaryList" class="records-list"></div>
+            </div>
+        </section>
+
         <!-- 基本資料 -->
         <section id="profile" class="section">
             <div class="card">
@@ -801,28 +1011,34 @@
     </div>
 
     <script>
-        // 數據存儲
-        let appData = {
-            expenses: [],
-            weights: [],
-            bloodPressure: [],
-            exercises: [],
-            profile: {
-                name: '',
-                birthday: '',
-                gender: '',
-                height: '',
-                activity: 'light'
-            }
-        };
+    // 數據存儲
+    let appData = {
+        expenses: [],
+        weights: [],
+        bloodPressure: [],
+        exercises: [],
+        tasks: [],
+        completedTasks: [],
+        diary: [],
+        habits: [],
+        profile: {
+            name: '',
+            birthday: '',
+            gender: '',
+            height: '',
+            activity: 'light'
+        }
+    };
 
-        // 篩選狀態
-        let filters = {
-            expense: 'all',
-            weight: 'all',
-            bloodPressure: 'all',
-            exercise: 'all'
-        };
+    // 篩選狀態
+    let filters = {
+        expense: 'all',
+        weight: 'all',
+        bloodPressure: 'all',
+        exercise: 'all',
+        completedTask: 'week',
+        diary: 'week'
+    };
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -836,9 +1052,12 @@
             document.getElementById('bpTime').value = now;
             document.getElementById('exerciseDate').value = today;
             document.getElementById('exerciseStartTime').value = now;
+            document.getElementById('taskNextDate').value = today;
+            document.getElementById('diaryDate').value = today;
 
             loadData();
             updateAllDisplays();
+            loadTodayDiary();
             loadProfile();
             setupPWAInstall();
         });
@@ -856,7 +1075,7 @@
             document.getElementById(sectionName).classList.add('active');
             
             const navBtns = document.querySelectorAll('.nav-btn');
-            const sections = ['expenses', 'weight', 'blood-pressure', 'exercise', 'charts', 'profile', 'settings'];
+            const sections = ['expenses', 'weight', 'blood-pressure', 'exercise', 'tasks', 'diary', 'charts', 'profile', 'settings'];
             const index = sections.indexOf(sectionName);
             if (index !== -1) {
                 navBtns[index].classList.add('active');
@@ -875,6 +1094,10 @@
                         weights: parsed.weights || [],
                         bloodPressure: parsed.bloodPressure || [],
                         exercises: parsed.exercises || [],
+                        tasks: parsed.tasks || [],
+                        completedTasks: parsed.completedTasks || [],
+                        diary: parsed.diary || [],
+                        habits: parsed.habits || [],
                         profile: {
                             name: '',
                             birthday: '',
@@ -913,6 +1136,8 @@
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
 
             appData.expenses = [
                 {
@@ -966,6 +1191,36 @@
                     calories: 200,
                     intensity: '中度',
                     note: '晨跑'
+                }
+            ];
+
+            appData.tasks = [
+                {
+                    id: Date.now() + 6,
+                    name: '繳電費',
+                    nextDate: nextWeek.toISOString().split('T')[0],
+                    interval: 'monthly',
+                    priority: 'medium',
+                    note: '記得在期限前繳費',
+                    created: today.toISOString().split('T')[0]
+                }
+            ];
+
+            appData.habits = [
+                { id: Date.now() + 7, name: '喝水8杯', created: today.toISOString().split('T')[0] },
+                { id: Date.now() + 8, name: '早睡早起', created: today.toISOString().split('T')[0] },
+                { id: Date.now() + 9, name: '閱讀30分鐘', created: today.toISOString().split('T')[0] }
+            ];
+
+            appData.diary = [
+                {
+                    id: Date.now() + 10,
+                    date: today.toISOString().split('T')[0],
+                    steps: 8000,
+                    mood: 4,
+                    habits: { [Date.now() + 7]: true, [Date.now() + 8]: false, [Date.now() + 9]: true },
+                    content: '今天天氣很好，出門散步了一會兒。',
+                    created: new Date().toISOString()
                 }
             ];
         }
@@ -1424,6 +1679,445 @@
             `).join('');
         }
 
+        // 例行任務功能
+        function addTask() {
+            const name = document.getElementById('taskName').value;
+            const nextDate = document.getElementById('taskNextDate').value;
+            const interval = document.getElementById('taskInterval').value;
+            const priority = document.getElementById('taskPriority').value;
+            const note = document.getElementById('taskNote').value;
+
+            if (!name || !nextDate || !interval) {
+                alert('請填寫任務名稱、下次到期日和重複間隔');
+                return;
+            }
+
+            const task = {
+                id: Date.now(),
+                name,
+                nextDate,
+                interval,
+                priority,
+                note,
+                created: new Date().toISOString().split('T')[0]
+            };
+
+            appData.tasks.push(task);
+            saveData();
+            updateTasksList();
+
+            // 清空表單
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskNextDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('taskInterval').value = '';
+            document.getElementById('taskPriority').value = 'medium';
+            document.getElementById('taskNote').value = '';
+    
+            showSuccessMessage('例行任務已新增！');
+        }
+
+        function completeTask(id) {
+            const taskIndex = appData.tasks.findIndex(task => task.id === id);
+            if (taskIndex === -1) return;
+
+            const task = appData.tasks[taskIndex];
+    
+            // 記錄完成
+            const completedTask = {
+                ...task,
+                completedDate: new Date().toISOString().split('T')[0],
+                completedTime: new Date().toTimeString().slice(0, 5)
+            };
+            appData.completedTasks.unshift(completedTask);
+
+            // 計算下次日期
+            const currentDate = new Date(task.nextDate);
+            const nextDate = calculateNextDate(currentDate, task.interval);
+            task.nextDate = nextDate.toISOString().split('T')[0];
+
+            saveData();
+            updateTasksList();
+            updateCompletedTasksList();
+            showSuccessMessage(`任務「${task.name}」已完成！下次日期：${task.nextDate}`);
+        }
+
+        function calculateNextDate(currentDate, interval) {
+            const nextDate = new Date(currentDate);
+    
+            switch(interval) {
+                case 'weekly':
+                    nextDate.setDate(nextDate.getDate() + 7);
+                    break;
+                case 'biweekly':
+                    nextDate.setDate(nextDate.getDate() + 14);
+                    break;
+                case 'monthly':
+                    nextDate.setMonth(nextDate.getMonth() + 1);
+                    break;
+                case 'quarterly':
+                    nextDate.setMonth(nextDate.getMonth() + 3);
+                    break;
+                case 'semiannual':
+                    nextDate.setMonth(nextDate.getMonth() + 6);
+                    break;
+                case 'annual':
+                    nextDate.setFullYear(nextDate.getFullYear() + 1);
+                    break;
+            }
+    
+            return nextDate;
+        }
+
+        function updateTasksList() {
+            const container = document.getElementById('tasksList');
+            const countElement = document.getElementById('taskCount');
+    
+            // 按照到期日排序
+            const sortedTasks = [...appData.tasks].sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
+    
+            countElement.textContent = sortedTasks.length;
+    
+            if (sortedTasks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">尚無例行任務</p>';
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+    
+            container.innerHTML = sortedTasks.map(task => {
+                const taskDate = new Date(task.nextDate);
+                const todayDate = new Date(today);
+                const daysDiff = Math.ceil((taskDate - todayDate) / (1000 * 60 * 60 * 24));
+        
+                let statusClass = 'upcoming';
+                let statusText = `還有 ${daysDiff} 天`;
+        
+                if (daysDiff < 0) {
+                    statusClass = 'overdue';
+                    statusText = `逾期 ${Math.abs(daysDiff)} 天`;
+                } else if (daysDiff === 0) {
+                    statusClass = 'today';
+                    statusText = '今天到期';
+                } else if (daysDiff <= 3) {
+                    statusClass = 'today';
+                    statusText = `還有 ${daysDiff} 天`;
+                }
+
+                return `
+                    <div class="task-item ${statusClass}">
+                        <input type="checkbox" class="task-checkbox" onclick="completeTask(${task.id})">
+                        <div class="task-content">
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-date">到期日：${task.nextDate} (${statusText})</div>
+                            ${task.note ? `<div style="font-size: 0.9rem; color: #6b7280; margin-top: 5px;">${task.note}</div>` : ''}
+                        </div>
+                        <div class="task-priority ${task.priority}">${getPriorityText(task.priority)}</div>
+                        <button class="delete-btn" onclick="deleteRecord('tasks', ${task.id})">刪除</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getPriorityText(priority) {
+            const priorities = {
+                'high': '🔴 高',
+                'medium': '🟡 中',
+                'low': '🟢 低'
+            };
+            return priorities[priority] || '🟡 中';
+        }
+
+        function showCompletedTasks() {
+            document.getElementById('completedTasksCard').style.display = 'block';
+            updateCompletedTasksList();
+        }
+
+        function hideCompletedTasks() {
+            document.getElementById('completedTasksCard').style.display = 'none';
+        }
+
+        function setCompletedTaskFilter(range) {
+            filters.completedTask = range;
+            updateCompletedTasksList();
+        }
+
+        function updateCompletedTasksList() {
+            const container = document.getElementById('completedTasksList');
+            const countElement = document.getElementById('completedTaskCount');
+    
+            let filteredTasks = filterRecordsByDate(
+                appData.completedTasks, 
+                filters.completedTask, 
+                null, 
+                null
+            );
+    
+            countElement.textContent = filteredTasks.length;
+    
+            if (filteredTasks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無已完成任務</p>';
+                return;
+            }
+
+            container.innerHTML = filteredTasks.map(task => `
+                <div class="record-item">
+                    <div class="record-content">
+                        <div class="record-date">${task.completedDate} ${task.completedTime}</div>
+                        <div class="record-details">
+                            <strong>${task.name}</strong> (${getPriorityText(task.priority)})
+                            ${task.note ? `<br><small style="color: #6b7280;">${task.note}</small>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 簡易日誌功能
+        function loadTodayDiary() {
+            const today = new Date().toISOString().split('T')[0];
+            loadDiaryForSpecificDate(today);
+            updateHabitsDisplay();
+            updateHabitsStats();
+        }
+
+        function loadDiaryForDate() {
+            const date = document.getElementById('diaryDate').value;
+            if (!date) {
+                alert('請選擇日期');
+                return;
+            }
+            loadDiaryForSpecificDate(date);
+        }
+
+        function loadDiaryForSpecificDate(date) {
+            const diary = appData.diary.find(d => d.date === date);
+    
+            if (diary) {
+                document.getElementById('diarySteps').value = diary.steps || '';
+                document.getElementById('diaryMood').value = diary.mood || '';
+                document.getElementById('diaryContent').value = diary.content || '';
+        
+                // 載入習慣完成狀態
+                appData.habits.forEach(habit => {
+                    const checkbox = document.querySelector(`input[data-habit-id="${habit.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = diary.habits && diary.habits[habit.id] || false;
+                    }
+                });
+            } else {
+                // 清空表單
+                document.getElementById('diarySteps').value = '';
+                document.getElementById('diaryMood').value = '';
+                document.getElementById('diaryContent').value = '';
+        
+                // 清空習慣勾選
+                appData.habits.forEach(habit => {
+                    const checkbox = document.querySelector(`input[data-habit-id="${habit.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                    }
+                });
+            }
+        }
+
+        function addHabit() {
+            const habitName = prompt('請輸入新習慣名稱：');
+            if (!habitName || !habitName.trim()) return;
+
+            const habit = {
+                id: Date.now(),
+                name: habitName.trim(),
+                created: new Date().toISOString().split('T')[0]
+            };
+
+            appData.habits.push(habit);
+            saveData();
+            updateHabitsDisplay();
+            updateHabitsStats();
+            showSuccessMessage('習慣已新增！');
+        }
+
+        function updateHabitsDisplay() {
+            const container = document.getElementById('habitsContainer');
+    
+            if (appData.habits.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 20px;">尚未建立習慣項目</p>';
+                return;
+            }
+
+            container.innerHTML = appData.habits.map(habit => {
+                const streak = calculateHabitStreak(habit.id);
+                return `
+                    <div class="habit-item">
+                        <input type="checkbox" class="habit-checkbox" data-habit-id="${habit.id}">
+                        <span class="habit-name">${habit.name}</span>
+                        <span class="habit-streak">${streak}天</span>
+                        <button onclick="deleteHabit(${habit.id})" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">刪除</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteHabit(habitId) {
+            if (!confirm('確定要刪除這個習慣嗎？')) return;
+    
+            appData.habits = appData.habits.filter(habit => habit.id !== habitId);
+            saveData();
+            updateHabitsDisplay();
+            updateHabitsStats();
+            showSuccessMessage('習慣已刪除！');
+        }
+
+        function calculateHabitStreak(habitId) {
+            let streak = 0;
+            const today = new Date();
+    
+            for (let i = 0; i < 365; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(today.getDate() - i);
+                const dateStr = checkDate.toISOString().split('T')[0];
+        
+                const diary = appData.diary.find(d => d.date === dateStr);
+                if (diary && diary.habits && diary.habits[habitId]) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+    
+            return streak;
+        }
+
+        function saveDiary() {
+            const date = document.getElementById('diaryDate').value;
+            const steps = parseInt(document.getElementById('diarySteps').value) || null;
+            const mood = parseInt(document.getElementById('diaryMood').value) || null;
+            const content = document.getElementById('diaryContent').value;
+
+            if (!date) {
+                alert('請選擇日期');
+                return;
+            }
+
+            // 收集習慣完成狀態
+            const habits = {};
+            appData.habits.forEach(habit => {
+                const checkbox = document.querySelector(`input[data-habit-id="${habit.id}"]`);
+                if (checkbox) {
+                    habits[habit.id] = checkbox.checked;
+                }
+            });
+
+            // 查找是否已有該日期的記錄
+            const existingIndex = appData.diary.findIndex(d => d.date === date);
+    
+            const diaryRecord = {
+                id: existingIndex >= 0 ? appData.diary[existingIndex].id : Date.now(),
+                date,
+                steps,
+                mood,
+                habits,
+                content,
+                created: existingIndex >= 0 ? appData.diary[existingIndex].created : new Date().toISOString(),
+                updated: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                appData.diary[existingIndex] = diaryRecord;
+            } else {
+                appData.diary.unshift(diaryRecord);
+            }
+
+            saveData();
+            updateDiaryList();
+            updateHabitsStats();
+            showSuccessMessage('日誌記錄已儲存！');
+        }
+
+        function updateHabitsStats() {
+            const container = document.getElementById('habitsStats');
+    
+            if (appData.habits.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 20px;">尚未建立習慣統計</p>';
+                return;
+            }
+
+            container.innerHTML = appData.habits.map(habit => {
+                const streak = calculateHabitStreak(habit.id);
+        
+                return `
+                    <div class="stat-card">
+                        <div class="stat-value">${streak}</div>
+                        <div class="stat-label">${habit.name}連續天數</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setDiaryFilter(range) {
+            filters.diary = range;
+            updateDiaryList();
+        }
+
+        function updateDiaryList() {
+            const container = document.getElementById('diaryList');
+            const countElement = document.getElementById('diaryCount');
+    
+            let filteredDiary = filterRecordsByDate(
+                appData.diary, 
+                filters.diary, 
+                null, 
+                null
+            );
+    
+            countElement.textContent = filteredDiary.length;
+    
+            if (filteredDiary.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">此時間範圍內無日誌記錄</p>';
+                return;
+            }
+
+            container.innerHTML = filteredDiary.map(diary => {
+                const moodText = getMoodText(diary.mood);
+                const completedHabits = appData.habits.filter(habit => diary.habits && diary.habits[habit.id]);
+        
+                return `
+                    <div class="diary-entry">
+                        <div class="diary-header">
+                            <span class="diary-date">${diary.date}</span>
+                            ${diary.mood ? `<span class="diary-mood mood-${diary.mood}">${moodText}</span>` : ''}
+                        </div>
+                
+                        ${diary.content ? `<div class="diary-content">${diary.content}</div>` : ''}
+                
+                        ${completedHabits.length > 0 ? `
+                            <div class="diary-habits">
+                                ${completedHabits.map(habit => `<span class="diary-habit-tag completed">${habit.name}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                
+                        <div class="diary-stats">
+                            ${diary.steps ? `<span>📱 ${diary.steps} 步</span>` : ''}
+                            <span>✅ ${completedHabits.length}/${appData.habits.length} 習慣</span>
+                        </div>
+                
+                        <button class="delete-btn" onclick="deleteRecord('diary', ${diary.id})">刪除</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getMoodText(mood) {
+            const moods = {
+                5: '😄 非常好',
+                4: '😊 很好',
+                3: '😐 普通',
+                2: '😔 不太好',
+                1: '😞 很糟'
+            };
+            return moods[mood] || '';
+        }
+
         // 統計函數
         function updateWeightStats() {
             if (appData.weights.length === 0) {
@@ -1738,9 +2432,14 @@
             updateWeightsList();
             updateBPList();
             updateExercisesList();
+            updateTasksList();
+            updateCompletedTasksList();
+            updateDiaryList();
             updateWeightStats();
             updateBPStats();
             updateExerciseStats();
+            updateHabitsDisplay();
+            updateHabitsStats();
             updateStats();
             updateProfileDisplay();
         }
@@ -1814,12 +2513,56 @@
                 csvContent.push('');
             }
 
+            if (appData.tasks.length > 0) {
+                csvContent.push('=== 例行任務 ===');
+                csvContent.push('任務名稱,下次到期日,重複間隔,優先級,備註,建立日期');
+                appData.tasks.forEach(task => {
+                    const taskNote = (task.note || '').replace(/"/g, '""');
+                    csvContent.push(`${task.name},${task.nextDate},${task.interval},${task.priority},"${taskNote}",${task.created}`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.completedTasks.length > 0) {
+                csvContent.push('=== 已完成任務記錄 ===');
+                csvContent.push('任務名稱,完成日期,完成時間,重複間隔,優先級,備註');
+                appData.completedTasks.forEach(task => {
+                    csvContent.push(`${task.name},${task.completedDate},${task.completedTime},${task.interval},${task.priority},"${task.note || ''}"`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.habits.length > 0) {
+                csvContent.push('=== 習慣列表 ===');
+                csvContent.push('習慣名稱,建立日期');
+                appData.habits.forEach(habit => {
+                    csvContent.push(`${habit.name},${habit.created}`);
+                });
+                csvContent.push('');
+            }
+
+            if (appData.diary.length > 0) {
+                csvContent.push('=== 日誌記錄 ===');
+                csvContent.push('日期,步數,心情評分,日誌內容,完成習慣數,習慣詳情');
+                appData.diary.forEach(diary => {
+                    const completedHabits = appData.habits.filter(habit => diary.habits && diary.habits[habit.id]);
+                    const habitsDetail = completedHabits.map(h => h.name).join(';');
+                    const content = (diary.content || '').replace(/"/g, '""'); // 處理雙引號
+                    csvContent.push(`${diary.date},${diary.steps || ''},${diary.mood || ''},"${content}",${completedHabits.length},"${habitsDetail}"`);
+                });
+                csvContent.push('');
+            }
+
             csvContent.push('=== 數據統計 ===');
             csvContent.push('類型,記錄數量');
             csvContent.push(`支出記錄,${appData.expenses.length}`);
             csvContent.push(`體重記錄,${appData.weights.length}`);
             csvContent.push(`血壓記錄,${appData.bloodPressure.length}`);
             csvContent.push(`運動記錄,${appData.exercises.length}`);
+            csvContent.push(`例行任務,${appData.tasks.length}`);
+            csvContent.push(`已完成任務,${appData.completedTasks.length}`);
+            csvContent.push(`習慣項目,${appData.habits.length}`);
+            csvContent.push(`日誌記錄,${appData.diary.length}`);
             csvContent.push(`匯出日期,${timestamp}`);
 
             const csvString = csvContent.join('\n');
@@ -1843,7 +2586,8 @@
                 case 'expenses':
                     csvContent.push('日期,分類,項目,金額,備註');
                     appData.expenses.forEach(expense => {
-                        csvContent.push(`${expense.date},${expense.category},${expense.item},${expense.amount},"${expense.note || ''}"`);
+                        const expenseNote = (expense.note || '').replace(/"/g, '""');
+                        csvContent.push(`${expense.date},${expense.category},${expense.item},${expense.amount},"${expenseNote}"`);
                     });
                     filename = `expenses_${timestamp}.csv`;
                     break;
@@ -1867,9 +2611,28 @@
                 case 'exercises':
                     csvContent.push('日期,開始時間,運動類型,時長(分鐘),消耗卡路里,強度,備註');
                     appData.exercises.forEach(exercise => {
-                        csvContent.push(`${exercise.date},${exercise.startTime},${exercise.type},${exercise.duration},${exercise.calories || ''},${exercise.intensity},"${exercise.note || ''}"`);
+                        const exerciseNote = (exercise.note || '').replace(/"/g, '""');
+                        csvContent.push(`${exercise.date},${exercise.startTime},${exercise.type},${exercise.duration},${exercise.calories || ''},${exercise.intensity},"${exerciseNote}"`);
                     });
                     filename = `exercises_${timestamp}.csv`;
+                    break;
+
+                case 'tasks':
+                    csvContent.push('任務名稱,下次到期日,重複間隔,優先級,備註,建立日期');
+                    appData.tasks.forEach(task => {
+                        csvContent.push(`${task.name},${task.nextDate},${task.interval},${task.priority},"${task.note || ''}",${task.created}`);
+                    });
+                    filename = `tasks_${timestamp}.csv`;
+                    break;
+
+                case 'diary':
+                    csvContent.push('日期,步數,心情評分,日誌內容,完成習慣數,習慣詳情');
+                    appData.diary.forEach(diary => {
+                        const completedHabits = appData.habits.filter(habit => diary.habits && diary.habits[habit.id]);
+                        const habitsDetail = completedHabits.map(h => h.name).join(';');
+                        csvContent.push(`${diary.date},${diary.steps || ''},${diary.mood || ''},"${diary.content || ''}",${completedHabits.length},"${habitsDetail}"`);
+                    });
+                    filename = `diary_${timestamp}.csv`;
                     break;
             }
 
@@ -1923,6 +2686,10 @@
                 weights: [],
                 bloodPressure: [],
                 exercises: [],
+                tasks: [],
+                completedTasks: [],
+                diary: [],
+                habits: [],
                 profile: {
                     name: '',
                     birthday: '',
